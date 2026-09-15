@@ -1,0 +1,2510 @@
+<title>คลังวัสดุ (Supabase)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    /* neutrals — cool with a faint teal bias */
+    --paper: #f4f6f6;
+    --surface: #ffffff;
+    --surface-2: #eef2f1;
+    --line: #dbe3e2;
+    --line-strong: #c3cfce;
+    --ink: #16211f;
+    --ink-soft: #47554f;
+    --ink-faint: #7a8781;
+    /* brand accent — deep pine/teal, industrial */
+    --accent: #0e7c6b;
+    --accent-deep: #0a5e51;
+    --accent-tint: #e2f0ed;
+    /* document semantics */
+    --pu: #1f8a53;        /* รับเข้า / จัดซื้อ */
+    --pu-tint: #e4f3ea;
+    --rc: #2563c9;        /* รับคืน */
+    --rc-tint: #e5edfb;
+    --pd: #c8621f;        /* เบิกจ่าย */
+    --pd-tint: #fbede0;
+    --po: #7c4dd6;        /* ใบสั่งซื้อ */
+    --po-tint: #efe9fb;
+    --danger: #c0392b;
+    --danger-tint: #fbe9e7;
+    --warn: #b7791f;
+    --warn-tint: #fbf1dd;
+    --shadow: 0 1px 2px rgba(16,33,31,.05), 0 8px 24px -12px rgba(16,33,31,.18);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --fd: 'Kanit', 'IBM Plex Sans Thai', system-ui, sans-serif;
+    --fb: 'IBM Plex Sans Thai', system-ui, sans-serif;
+    --fm: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --paper: #0e1513;
+      --surface: #151e1c;
+      --surface-2: #1c2725;
+      --line: #29352f;
+      --line-strong: #37453f;
+      --ink: #e8efec;
+      --ink-soft: #a9b7b1;
+      --ink-faint: #74827c;
+      --accent: #38b39d;
+      --accent-deep: #2b9985;
+      --accent-tint: #16302b;
+      --pu: #4fbd82;
+      --pu-tint: #16301f;
+      --rc: #6a9dee;
+      --rc-tint: #16233c;
+      --pd: #e28a4d;
+      --pd-tint: #372012;
+      --po: #a889f0;
+      --po-tint: #241a3d;
+      --danger: #e5786b;
+      --danger-tint: #35201c;
+      --warn: #d7a24a;
+      --warn-tint: #33280f;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0e1513;
+    --surface: #151e1c;
+    --surface-2: #1c2725;
+    --line: #29352f;
+    --line-strong: #37453f;
+    --ink: #e8efec;
+    --ink-soft: #a9b7b1;
+    --ink-faint: #74827c;
+    --accent: #38b39d;
+    --accent-deep: #2b9985;
+    --accent-tint: #16302b;
+    --pu: #4fbd82;
+    --pu-tint: #16301f;
+    --rc: #6a9dee;
+    --rc-tint: #16233c;
+    --pd: #e28a4d;
+    --pd-tint: #372012;
+    --po: #a889f0;
+    --po-tint: #241a3d;
+    --danger: #e5786b;
+    --danger-tint: #35201c;
+    --warn: #d7a24a;
+    --warn-tint: #33280f;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--fb);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 { font-family: var(--fd); font-weight: 600; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+  button { font-family: var(--fb); cursor: pointer; }
+  input, select, textarea { font-family: var(--fb); font-size: 14px; color: var(--ink); }
+  .mono { font-family: var(--fm); font-variant-numeric: tabular-nums; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ---------- shell ---------- */
+  .app { max-width: 1120px; margin: 0 auto; padding: 0 20px 80px; }
+  header.top {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+    margin: 0 -20px 0;
+    padding: 0 20px;
+  }
+  .top-inner { max-width: 1120px; margin: 0 auto; display: flex; align-items: center; gap: 14px; padding: 14px 0; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .mark {
+    width: 40px; height: 40px; border-radius: 11px; flex: none;
+    background: linear-gradient(150deg, var(--accent), var(--accent-deep));
+    display: grid; place-items: center; color: #fff; font-family: var(--fd); font-weight: 700; font-size: 19px;
+    box-shadow: 0 6px 16px -8px var(--accent);
+  }
+  .brand h1 { font-size: 18px; line-height: 1.15; }
+  .brand .sub { font-size: 12px; color: var(--ink-faint); font-family: var(--fb); }
+  .top-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .chip-demo {
+    font-size: 11.5px; color: var(--warn); background: var(--warn-tint);
+    border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
+    padding: 4px 9px; border-radius: 999px; font-weight: 500; white-space: nowrap;
+  }
+  .conn { font-size: 11.5px; padding: 4px 9px; border-radius: 999px; font-weight: 600; white-space: nowrap; border: 1px solid transparent; }
+  .conn-on { color: var(--pu); background: var(--pu-tint); border-color: color-mix(in srgb, var(--pu) 30%, transparent); }
+  .conn-off { color: var(--warn); background: var(--warn-tint); border-color: color-mix(in srgb, var(--warn) 30%, transparent); }
+  .conn-wait { color: var(--ink-faint); background: var(--surface-2); }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--ink-soft); font-size: 16px; display: grid; place-items: center;
+  }
+  .icon-btn:hover { border-color: var(--line-strong); color: var(--ink); }
+
+  nav.tabs {
+    display: flex; gap: 4px; overflow-x: auto; padding: 10px 0 0;
+    scrollbar-width: none;
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    border: 0; background: transparent; color: var(--ink-soft);
+    padding: 9px 14px 12px; font-size: 14.5px; font-weight: 500; white-space: nowrap;
+    border-bottom: 2px solid transparent; border-radius: 0; display: flex; align-items: center; gap: 7px;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab .badge { background: var(--danger); color:#fff; font-size:11px; border-radius:999px; padding:1px 6px; font-family:var(--fm); }
+
+  main { padding-top: 26px; }
+  .view { display: block; }
+  .view[hidden] { display: none; }
+  .view-head { display: flex; align-items: flex-end; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+  .view-head h2 { font-size: 22px; }
+  .view-head p { margin: 3px 0 0; color: var(--ink-faint); font-size: 13.5px; }
+  .view-head .spacer { margin-left: auto; }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+    padding: 9px 15px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .btn:hover { border-color: var(--ink-faint); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); }
+  .btn.ghost { border-color: transparent; background: transparent; color: var(--accent); padding-left: 6px; padding-right: 6px; }
+  .btn.sm { padding: 6px 11px; font-size: 13px; }
+  .btn.danger { color: var(--danger); border-color: transparent; background: transparent; }
+  .btn.danger:hover { background: var(--danger-tint); }
+
+  /* ---------- cards / grid ---------- */
+  .grid { display: grid; gap: 16px; }
+  .stat-row { grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); }
+  @media (max-width: 560px){ .stat-row { grid-template-columns: repeat(2, 1fr); } }
+  .stat {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .stat .label { font-size: 12.5px; color: var(--ink-faint); font-weight: 500; display:flex; align-items:center; gap:6px; }
+  .stat .value { font-family: var(--fd); font-weight: 700; font-size: 30px; line-height: 1.1; margin-top: 8px; }
+  .stat .value.num { font-variant-numeric: tabular-nums; }
+  .stat .foot { font-size: 12px; color: var(--ink-faint); margin-top: 4px; }
+  .stat.alert .value { color: var(--danger); }
+
+  .panel {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .panel-head { padding: 15px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
+  .panel-head h3 { font-size: 15.5px; }
+  .panel-head .spacer { margin-left: auto; }
+  .panel-body { padding: 6px 0; }
+  .two-col { display: grid; grid-template-columns: 1.15fr .85fr; gap: 16px; }
+  @media (max-width: 880px){ .two-col { grid-template-columns: 1fr; } }
+
+  /* ---------- table ---------- */
+  .twrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-family: var(--fb); font-weight: 600; font-size: 12px; color: var(--ink-faint);
+       text-transform: uppercase; letter-spacing: .04em; padding: 10px 16px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  td { padding: 11px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tfoot td { border-bottom: 0; border-top: 1.5px solid var(--line-strong); }
+  tbody tr:hover { background: var(--surface-2); }
+  td.right, th.right { text-align: right; }
+  td.center, th.center { text-align: center; }
+  .muted { color: var(--ink-faint); }
+  .empty { text-align: center; color: var(--ink-faint); padding: 34px 16px; font-size: 14px; }
+
+  /* ---------- badges / pills ---------- */
+  .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; font-family: var(--fb); }
+  .pill.pu { color: var(--pu); background: var(--pu-tint); }
+  .pill.rc { color: var(--rc); background: var(--rc-tint); }
+  .pill.pd { color: var(--pd); background: var(--pd-tint); }
+  .pill.po { color: var(--po); background: var(--po-tint); }
+  .pill.st-open { color: var(--warn); background: var(--warn-tint); }
+  .pill.st-partial { color: var(--rc); background: var(--rc-tint); }
+  .pill.st-complete { color: var(--pu); background: var(--pu-tint); }
+  .pill.st-danger { color: var(--danger); background: var(--danger-tint); }
+  .pill.st-warn { color: var(--warn); background: var(--warn-tint); }
+  .pill.st-ok { color: var(--pu); background: var(--pu-tint); }
+  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .pbar { height: 6px; background: var(--surface-2); border-radius: 99px; overflow: hidden; min-width: 90px; border: 1px solid var(--line); }
+  .pbar > span { display: block; height: 100%; border-radius: 99px; background: var(--rc); }
+  .pbar.done > span { background: var(--pu); }
+  .chip-cat { font-size: 11.5px; font-weight: 500; padding: 2px 9px; border-radius: 6px;
+    background: var(--surface-2); color: var(--ink-soft); display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .chip-cat .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+  .dot-office { background: var(--accent); }
+  .dot-prod { background: var(--pd); }
+  .baht { font-family: var(--fm); font-variant-numeric: tabular-nums; }
+  .stock-pill { font-family: var(--fm); font-weight: 600; font-size: 13px; padding: 2px 8px; border-radius: 6px; }
+  .stock-ok { color: var(--pu); background: var(--pu-tint); }
+  .stock-low { color: var(--danger); background: var(--danger-tint); }
+  .qty-in { color: var(--pu); font-weight: 600; }
+  .qty-out { color: var(--pd); font-weight: 600; }
+
+  .doc-no { font-family: var(--fm); font-weight: 600; letter-spacing: .01em; }
+
+  /* ---------- forms ---------- */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
+  .field label .req { color: var(--danger); }
+  .field .hint { font-size: 11.5px; color: var(--ink-faint); font-weight: 400; }
+  input[type=text], input[type=number], input[type=date], select, textarea {
+    width: 100%; padding: 9px 11px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+    background: var(--surface); outline: none; transition: border-color .12s, box-shadow .12s;
+  }
+  textarea { resize: vertical; min-height: 62px; line-height: 1.45; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+  select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a8781' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; padding-right: 30px; }
+  .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+  @media (max-width: 640px){ .form-grid { grid-template-columns: 1fr; } }
+
+  /* segmented type selector */
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .seg .opt { border: 1.5px solid var(--line-strong); border-radius: 10px; padding: 12px; background: var(--surface); text-align: left; display: flex; flex-direction: column; gap: 3px; }
+  .seg .opt .t { font-family: var(--fd); font-weight: 600; font-size: 14px; display:flex; align-items:center; gap:7px; }
+  .seg .opt .d { font-size: 11.5px; color: var(--ink-faint); }
+  .seg .opt .code { font-family: var(--fm); font-weight: 600; font-size: 12px; padding: 1px 6px; border-radius: 5px; }
+  .seg .opt[data-t=PU] .code { color: var(--pu); background: var(--pu-tint); }
+  .seg .opt[data-t=RC] .code { color: var(--rc); background: var(--rc-tint); }
+  .seg .opt[data-t=PD] .code { color: var(--pd); background: var(--pd-tint); }
+  .seg .opt.active[data-t=PU] { border-color: var(--pu); box-shadow: 0 0 0 3px var(--pu-tint); }
+  .seg .opt.active[data-t=RC] { border-color: var(--rc); box-shadow: 0 0 0 3px var(--rc-tint); }
+  .seg .opt.active[data-t=PD] { border-color: var(--pd); box-shadow: 0 0 0 3px var(--pd-tint); }
+
+  /* line item rows */
+  .lines { display: flex; flex-direction: column; gap: 8px; }
+  .line-row { display: grid; grid-template-columns: 1fr 130px 34px; gap: 8px; align-items: start; }
+  .line-row .rm { width: 34px; height: 38px; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; color: var(--ink-faint); font-size: 16px; }
+  .line-row .rm:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-tint); }
+  .lines-head { display: grid; grid-template-columns: 1fr 130px 34px; gap: 8px; font-size: 11.5px; color: var(--ink-faint); font-weight: 600; padding: 0 2px; }
+
+  .doc-preview {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: var(--surface-2); border: 1px dashed var(--line-strong); border-radius: 10px; padding: 12px 16px;
+  }
+  .doc-preview .lbl { font-size: 12px; color: var(--ink-faint); font-weight: 600; }
+  .doc-preview .no { font-family: var(--fm); font-weight: 600; font-size: 22px; letter-spacing: .02em; }
+
+  /* ---------- modal ---------- */
+  .modal-back { position: fixed; inset: 0; background: rgba(16,33,31,.42); backdrop-filter: blur(2px); display: grid; place-items: center; padding: 20px; z-index: 60; }
+  .modal-back[hidden] { display: none; }
+  .modal { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 24px 60px -20px rgba(0,0,0,.5); width: 100%; max-width: 560px; max-height: 90vh; overflow: auto; }
+  .modal-head { padding: 18px 20px; border-bottom: 1px solid var(--line); display: flex; align-items: center; }
+  .modal-head h3 { font-size: 17px; }
+  .modal-head .x { margin-left: auto; }
+  .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+  .modal-foot { padding: 15px 20px; border-top: 1px solid var(--line); display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* doc detail lines list */
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; font-size: 14px; }
+  .kv dt { color: var(--ink-faint); font-size: 13px; }
+  .kv dd { margin: 0; font-weight: 500; }
+
+  .toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: var(--paper); padding: 11px 20px; border-radius: 10px; font-size: 14px; font-weight: 500;
+    box-shadow: 0 14px 30px -10px rgba(0,0,0,.5); opacity: 0; transition: all .25s; z-index: 80; pointer-events: none;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  .filters select, .filters input { width: auto; min-width: 150px; }
+  .seg-mini { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 8px; overflow: hidden; }
+  .seg-mini button { border: 0; background: var(--surface); padding: 7px 12px; font-size: 13px; color: var(--ink-soft); border-right: 1px solid var(--line); }
+  .seg-mini button:last-child { border-right: 0; }
+  .seg-mini button.active { background: var(--accent); color: #fff; font-weight: 600; }
+
+  @media (prefers-reduced-motion: reduce){ * { transition: none !important; } }
+
+  /* ---------- print / PO document ---------- */
+  #printRoot[hidden]{ display:none !important; }
+  #printRoot{ position:fixed; inset:0; z-index:100; background:#6b736f; overflow:auto; padding:24px 0 60px; }
+  .print-toolbar{ position:sticky; top:0; z-index:2; display:flex; gap:10px; justify-content:center; align-items:center;
+    background:var(--surface); border-bottom:1px solid var(--line); padding:12px; margin:-24px 0 24px; }
+  .po-sheet{ width:210mm; min-height:297mm; margin:0 auto; background:#fff; color:#111; padding:14mm 12mm;
+    box-shadow:0 6px 30px rgba(0,0,0,.35); font-family:'IBM Plex Sans Thai', system-ui, sans-serif; font-size:13px; line-height:1.35; }
+  .po-sheet *{ box-sizing:border-box; }
+  .po-hd{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; border-bottom:2px solid #111; padding-bottom:8px; }
+  .po-hd .co-name{ font-family:'Kanit',sans-serif; font-weight:600; font-size:17px; line-height:1.2; color:#0a2b6b; }
+  .po-hd .co-en{ font-weight:600; font-size:12px; color:#0a2b6b; letter-spacing:.02em; }
+  .po-hd .co-addr{ font-size:11px; color:#333; margin-top:3px; line-height:1.45; }
+  .po-hd .co-logo{ text-align:right; flex:none; }
+  .po-hd .co-logo .lg{ font-family:'Kanit',sans-serif; font-weight:700; font-size:20px; color:#0a2b6b; border:2px solid #0a2b6b; border-radius:8px; padding:6px 12px; display:inline-block; }
+  .po-title{ text-align:center; font-family:'Kanit',sans-serif; font-weight:600; font-size:18px; letter-spacing:.06em; margin:12px 0 8px; }
+  .po-meta{ display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid #111; }
+  .po-meta > div{ padding:6px 9px; font-size:12px; }
+  .po-meta .l{ border-right:1px solid #111; }
+  .po-meta .row{ display:flex; gap:6px; padding:2px 0; }
+  .po-meta .k{ color:#444; min-width:96px; }
+  .po-meta .v{ font-weight:600; }
+  table.po-tb{ width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; }
+  table.po-tb th, table.po-tb td{ border:1px solid #111; padding:6px 8px; vertical-align:top; }
+  table.po-tb th{ background:#eef2f7; text-align:center; font-weight:600; }
+  table.po-tb td.c{ text-align:center; } table.po-tb td.r{ text-align:right; font-variant-numeric:tabular-nums; }
+  table.po-tb .spacer td{ height:100%; border-top:0; border-bottom:0; }
+  table.po-tb tfoot td{ font-weight:600; }
+  .po-sum-lbl{ text-align:right; }
+  .po-baht{ border:1px solid #111; border-top:0; padding:6px 9px; font-weight:600; text-align:center; font-size:12px; }
+  .po-sign{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:34px; text-align:center; font-size:12px; }
+  .po-sign .ln{ border-top:1px dotted #333; margin:34px 12px 6px; }
+  .po-foot{ margin-top:20px; font-size:10.5px; color:#444; line-height:1.5; border-top:1px solid #ccc; padding-top:8px; }
+  @media print {
+    body.po-printing{ background:#fff; }
+    body.po-printing > *{ display:none !important; }
+    body.po-printing #printRoot{ display:block !important; position:static; background:#fff; padding:0; overflow:visible; }
+    body.po-printing .print-toolbar{ display:none !important; }
+    body.po-printing .po-sheet{ width:auto; min-height:auto; margin:0; padding:0; box-shadow:none; }
+    @page{ size:A4; margin:12mm; }
+  }
+
+  /* ---------- PO template designer ---------- */
+  #designRoot[hidden]{ display:none !important; }
+  #designRoot{ position:fixed; inset:0; z-index:100; background:var(--paper); display:flex; flex-direction:column; }
+  .dz-bar{ display:flex; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid var(--line); background:var(--surface); }
+  .dz-bar h3{ font-size:16px; margin:0; }
+  .dz-bar .sp{ flex:1; }
+  .dz-body{ flex:1; display:grid; grid-template-columns:1fr 1fr; min-height:0; }
+  .dz-edit{ display:flex; flex-direction:column; border-right:1px solid var(--line); min-height:0; }
+  .dz-edit textarea{ flex:1; width:100%; border:0; padding:14px; font-family:var(--fm); font-size:12.5px; line-height:1.55; resize:none; outline:none; background:var(--surface); color:var(--ink); }
+  .dz-help{ font-size:11.5px; color:var(--ink-soft); padding:10px 14px; border-top:1px solid var(--line); background:var(--surface-2); max-height:160px; overflow:auto; line-height:1.8; }
+  .dz-help code{ background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:0 5px; font-size:11px; color:var(--accent); font-family:var(--fm); }
+  .dz-prev{ overflow:auto; background:#6b736f; padding:20px; min-height:0; }
+  @media (max-width:820px){ .dz-body{ grid-template-columns:1fr; } .dz-prev{ display:none; } }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <div class="mark">คว</div>
+      <div>
+        <h1>คลังวัสดุสิ้นเปลือง</h1>
+        <div class="sub">ระบบรับเข้า–จ่ายออก วัสดุสำนักงาน</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span class="conn conn-wait" id="connChip">● กำลังเชื่อมต่อ…</span>
+      <span class="chip-demo" id="demoBadge" hidden>● ข้อมูลตัวอย่าง</span>
+      <button class="btn sm" id="dataBtn">⚙ จัดการข้อมูล</button>
+      <button class="icon-btn" id="themeBtn" title="สลับธีมสว่าง/มืด" aria-label="สลับธีม">◐</button>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-view="dash">แดชบอร์ด</button>
+    <button class="tab" data-view="po">ใบสั่งซื้อ (PO)</button>
+    <button class="tab" data-view="tx">รับเข้า–จ่ายออก</button>
+    <button class="tab" data-view="items">รายการวัสดุ</button>
+    <button class="tab" data-view="reorder">จุดสั่งซื้อ</button>
+    <button class="tab" data-view="sup">ซัพพลายเออร์</button>
+    <button class="tab" data-view="hist">ประวัติเอกสาร</button>
+    <button class="tab" data-view="report">รายงาน</button>
+    <button class="tab" data-view="assets">ทรัพย์สิน</button>
+  </nav>
+</header>
+
+<div class="app">
+  <main>
+    <!-- ============ DASHBOARD ============ -->
+    <section class="view" id="view-dash">
+      <div class="view-head">
+        <div>
+          <h2>ภาพรวมคลัง</h2>
+          <p id="dashDate"></p>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn primary" data-goto="tx">+ สร้างเอกสาร</button>
+      </div>
+
+      <div class="grid stat-row" id="statRow"></div>
+
+      <div style="height:16px"></div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>ต้องสั่งเพิ่ม (ต่ำกว่าจุดสั่งซื้อ)</h3>
+            <div class="spacer"></div>
+            <span class="muted" style="font-size:12.5px" id="lowCount"></span>
+          </div>
+          <div class="panel-body twrap" id="lowStock"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3>เอกสารล่าสุด</h3>
+            <div class="spacer"></div>
+            <button class="btn ghost sm" data-goto="hist">ดูทั้งหมด →</button>
+          </div>
+          <div class="panel-body twrap" id="recentDocs"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PURCHASE ORDER ============ -->
+    <section class="view" id="view-po" hidden>
+      <div class="view-head">
+        <div>
+          <h2>ใบสั่งซื้อ (PO)</h2>
+          <p>เปิดใบสั่งซื้อถึงซัพพลายเออร์ก่อน เมื่อของมาส่งจึงสร้างใบรับ PU อ้างอิงกลับไปที่ PO นี้</p>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn primary" id="addPoBtn">+ สร้างใบสั่งซื้อ</button>
+      </div>
+      <div class="filters">
+        <div class="seg-mini" id="poFilter">
+          <button class="active" data-f="ALL">ทั้งหมด</button>
+          <button data-f="open">รอรับของ</button>
+          <button data-f="partial">รับบางส่วน</button>
+          <button data-f="complete">รับครบแล้ว</button>
+        </div>
+        <input type="text" id="poSearch" placeholder="ค้นหาเลขที่ / ซัพพลายเออร์…">
+      </div>
+      <div class="panel">
+        <div class="panel-body twrap" id="poTable"></div>
+      </div>
+    </section>
+
+    <!-- ============ TRANSACTION ============ -->
+    <section class="view" id="view-tx" hidden>
+      <div class="view-head">
+        <div>
+          <h2>สร้างเอกสารรับ–จ่าย</h2>
+          <p>เลือกประเภทเอกสาร ระบบจะออกเลขที่ให้อัตโนมัติ แล้วเพิ่มรายการวัสดุได้หลายบรรทัด</p>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-body" style="padding:20px; display:flex; flex-direction:column; gap:18px">
+
+            <div class="field">
+              <label>ประเภทเอกสาร</label>
+              <div class="seg" id="typeSeg">
+                <button type="button" class="opt active" data-t="PU">
+                  <span class="t"><span class="code">PU</span> รับเข้า</span>
+                  <span class="d">รับของตามใบสั่งซื้อ</span>
+                </button>
+                <button type="button" class="opt" data-t="RC">
+                  <span class="t"><span class="code">RC</span> รับคืน</span>
+                  <span class="d">รับคืนเข้าคลัง</span>
+                </button>
+                <button type="button" class="opt" data-t="PD">
+                  <span class="t"><span class="code">PD</span> เบิกจ่าย</span>
+                  <span class="d">เบิกจ่ายออกจากคลัง</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="doc-preview">
+              <span class="lbl">เลขที่เอกสาร (อัตโนมัติ)</span>
+              <span class="no" id="docNoPreview">—</span>
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label>วันที่<span class="req">*</span></label>
+                <input type="date" id="txDate">
+              </div>
+              <div class="field" id="partyField">
+                <!-- filled by JS: supplier select or text input -->
+              </div>
+            </div>
+
+            <div class="field" id="poRefField" hidden>
+              <label>อ้างอิงใบสั่งซื้อ (PO) <span class="hint">— เลือกเพื่อดึงรายการค้างรับมาอัตโนมัติ</span></label>
+              <select id="txPoRef"></select>
+            </div>
+
+            <div class="field">
+              <div style="display:flex; align-items:center;">
+                <label>รายการวัสดุ<span class="req">*</span></label>
+                <button type="button" class="btn ghost sm" id="addLineBtn" style="margin-left:auto">+ เพิ่มบรรทัด</button>
+              </div>
+              <div class="lines-head">
+                <span>วัสดุ</span><span>จำนวน</span><span></span>
+              </div>
+              <div class="lines" id="lineRows"></div>
+            </div>
+
+            <div class="field">
+              <label>หมายเหตุ</label>
+              <textarea id="txNote" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
+            </div>
+
+            <div style="display:flex; gap:10px; justify-content:flex-end">
+              <button class="btn" id="txResetBtn">ล้างฟอร์ม</button>
+              <button class="btn primary" id="txSaveBtn">บันทึกเอกสาร</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="align-self:start">
+          <div class="panel-head"><h3>สรุปรายการ</h3></div>
+          <div class="panel-body" style="padding:8px 18px 18px">
+            <div id="txSummary" class="muted" style="font-size:13.5px; padding:14px 0">ยังไม่ได้เลือกวัสดุ</div>
+            <div style="border-top:1px solid var(--line); margin-top:6px; padding-top:14px; font-size:12.5px; color:var(--ink-faint); line-height:1.7">
+              <strong style="color:var(--ink-soft)">รูปแบบเลขที่เอกสาร</strong><br>
+              <span class="mono">PU</span> · <span class="mono">RC</span> · <span class="mono">PD</span> + ปี พ.ศ. 2 หลัก + เดือน 2 หลัก + ลำดับ 4 หลัก<br>
+              ตัวอย่าง <span class="mono">PU69090001</span> = จัดซื้อ ปี 69 เดือน 09 ลำดับ 0001<br>
+              <span style="color:var(--ink-faint)">ลำดับเริ่มนับ 0001 ใหม่ทุกเดือน แยกตามประเภทเอกสาร</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ITEMS ============ -->
+    <section class="view" id="view-items" hidden>
+      <div class="view-head">
+        <div>
+          <h2>รายการวัสดุ</h2>
+          <p>เพิ่ม แก้ไข หรือลบวัสดุได้ตลอดเวลา ยอดคงเหลือคำนวณจากเอกสารรับ–จ่ายอัตโนมัติ</p>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn primary" id="addItemBtn">+ เพิ่มวัสดุ</button>
+      </div>
+      <div class="filters">
+        <div class="seg-mini" id="itemFilter">
+          <button class="active" data-f="ALL">ทั้งหมด</button>
+          <button data-f="office">อุปกรณ์สำนักงาน</button>
+          <button data-f="prod">สิ้นเปลือง (ผลิต)</button>
+        </div>
+        <input type="text" id="itemSearch" placeholder="ค้นหาชื่อ / รหัส…">
+      </div>
+      <div class="panel">
+        <div class="panel-body twrap" id="itemsTable"></div>
+      </div>
+    </section>
+
+    <!-- ============ REORDER POINT ============ -->
+    <section class="view" id="view-reorder" hidden>
+      <div class="view-head">
+        <div>
+          <h2>จุดสั่งซื้อ — ของสิ้นเปลือง (ผลิต)</h2>
+          <p>คำนวณจุดสั่งซื้ออัตโนมัติจากอัตราการเบิกจ่ายจริง แจ้งเตือนเมื่อสต็อกต่ำกว่าที่ควรสั่ง</p>
+        </div>
+        <div class="spacer"></div>
+        <div class="field" style="min-width:150px">
+          <label style="font-size:11.5px">ช่วงคำนวณอัตราการใช้</label>
+          <select id="reorderWindowSel">
+            <option value="30">30 วันล่าสุด</option>
+            <option value="60">60 วันล่าสุด</option>
+            <option value="90" selected>90 วันล่าสุด</option>
+            <option value="180">180 วันล่าสุด</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid stat-row" id="reorderStats"></div>
+      <div style="height:16px"></div>
+      <div class="panel">
+        <div class="panel-body twrap" id="reorderTable"></div>
+      </div>
+      <div class="panel" style="margin-top:16px">
+        <div class="panel-body" style="padding:16px 18px; font-size:12.5px; color:var(--ink-soft); line-height:1.7">
+          <strong style="font-family:var(--fd)">วิธีคิดจุดสั่งซื้อ (Reorder Point)</strong><br>
+          <span class="mono" style="color:var(--accent)">จุดสั่งซื้อ = อัตราใช้เฉลี่ยต่อวัน × ระยะเวลารอของ (lead time) + สต็อกเผื่อ (safety)</span><br>
+          อัตราใช้เฉลี่ยต่อวัน คำนวณจากยอดเบิกจ่าย (PD) ของแต่ละวัสดุในช่วงที่เลือก หารด้วยจำนวนวัน<br>
+          เมื่อ “คงเหลือ” ต่ำกว่า “จุดสั่งซื้อ” ระบบจะขึ้นสถานะ <span class="pill st-danger" style="font-size:11px"><span class="dot"></span>ควรสั่งซื้อ</span> — ตั้งค่า lead time และ safety ได้ที่ปุ่มแก้ไขของแต่ละรายการ
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SUPPLIERS ============ -->
+    <section class="view" id="view-sup" hidden>
+      <div class="view-head">
+        <div>
+          <h2>ซัพพลายเออร์</h2>
+          <p>บันทึกชื่อผู้ขาย/คู่ค้า เพื่อเลือกใช้ตอนสร้างเอกสารรับเข้า</p>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn primary" id="addSupBtn">+ เพิ่มซัพพลายเออร์</button>
+      </div>
+      <div class="panel">
+        <div class="panel-body twrap" id="supTable"></div>
+      </div>
+    </section>
+
+    <!-- ============ HISTORY ============ -->
+    <section class="view" id="view-hist" hidden>
+      <div class="view-head">
+        <div>
+          <h2>ประวัติเอกสาร</h2>
+          <p>เอกสารรับเข้า–จ่ายออกทั้งหมด กดที่แถวเพื่อดูรายละเอียด</p>
+        </div>
+      </div>
+      <div class="filters">
+        <div class="seg-mini" id="histFilter">
+          <button class="active" data-f="ALL">ทั้งหมด</button>
+          <button data-f="PU">รับเข้า</button>
+          <button data-f="RC">รับคืน</button>
+          <button data-f="PD">เบิกจ่าย</button>
+        </div>
+        <input type="text" id="histSearch" placeholder="ค้นหาเลขที่ / วัสดุ / คู่ค้า…">
+      </div>
+      <div class="panel">
+        <div class="panel-body twrap" id="histTable"></div>
+      </div>
+    </section>
+
+    <!-- ============ REPORT ============ -->
+    <section class="view" id="view-report" hidden>
+      <div class="view-head">
+        <div>
+          <h2>รายงานเคลื่อนไหวสต็อก</h2>
+          <p>เลือกช่วงวันที่และวัสดุที่จะดู — เห็นยอดยกมา รับเข้า เบิกออก และคงเหลือ แล้วดาวน์โหลดเป็น Excel</p>
+        </div>
+      </div>
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-body" style="padding:16px 18px; display:flex; flex-direction:column; gap:14px">
+          <div class="form-grid">
+            <div class="field"><label>วันที่เริ่ม</label><input type="date" id="repStart"></div>
+            <div class="field"><label>วันที่สิ้นสุด</label><input type="date" id="repEnd"></div>
+          </div>
+          <div class="filters" style="margin:0">
+            <div class="seg-mini" id="repPreset">
+              <button data-p="thismonth" class="active">เดือนนี้</button>
+              <button data-p="lastmonth">เดือนก่อน</button>
+              <button data-p="thisyear">ปีนี้</button>
+              <button data-p="last90">90 วัน</button>
+            </div>
+            <select id="repCat" style="width:auto; min-width:150px">
+              <option value="ALL">ทุกหมวด</option>
+              <option value="office">อุปกรณ์สำนักงาน</option>
+              <option value="prod">สิ้นเปลือง (ผลิต)</option>
+            </select>
+          </div>
+          <div class="field">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap">
+              <label style="margin:0">เลือกวัสดุที่จะดู</label>
+              <input type="text" id="repSearch" placeholder="ค้นหา…" style="width:auto; flex:1; min-width:120px">
+              <button type="button" class="btn ghost sm" id="repAll">เลือกทั้งหมด</button>
+              <button type="button" class="btn ghost sm" id="repNone">ล้าง</button>
+            </div>
+            <div id="repItems" style="max-height:170px; overflow:auto; border:1px solid var(--line); border-radius:10px; padding:6px 10px; margin-top:6px; columns:2; column-gap:18px"></div>
+          </div>
+          <div style="display:flex; gap:10px; justify-content:flex-end">
+            <button class="btn" id="repXlsx">⬇ ดาวน์โหลด Excel</button>
+            <button class="btn primary" id="repRun">สร้างรายงาน</button>
+          </div>
+        </div>
+      </div>
+      <div class="grid stat-row" id="repStats"></div>
+      <div style="height:16px"></div>
+      <div class="panel">
+        <div class="panel-body twrap" id="repTable"></div>
+      </div>
+    </section>
+
+    <!-- ============ ASSETS ============ -->
+    <section class="view" id="view-assets" hidden>
+      <div class="view-head">
+        <div>
+          <h2>ทะเบียนทรัพย์สิน</h2>
+          <p>บันทึกการซื้อทรัพย์สิน วันที่ซื้อ/รับเข้า อ้างอิงเลขที่ PO พร้อมประวัติและค่าเสื่อมของแต่ละชิ้น</p>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn" id="addOpeningBtn">+ ทรัพย์สินเดิม (ยกยอด)</button>
+        <button class="btn primary" id="addAssetBtn">+ รับเข้าทรัพย์สิน (ตาม PO)</button>
+      </div>
+      <div class="grid stat-row" id="assetStats"></div>
+      <div style="height:16px"></div>
+      <div class="filters">
+        <div class="seg-mini" id="assetFilter">
+          <button class="active" data-f="ALL">ทั้งหมด</button>
+          <button data-f="active">ใช้งาน</button>
+          <button data-f="repair">ซ่อมบำรุง</button>
+          <button data-f="retired">จำหน่ายแล้ว</button>
+        </div>
+        <input type="text" id="assetSearch" placeholder="ค้นหารหัส / ชื่อ / ที่ตั้ง…">
+      </div>
+      <div class="panel">
+        <div class="panel-body twrap" id="assetTable"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- generic modal -->
+<div class="modal-back" id="modalBack" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h3 id="modalTitle"></h3><button class="icon-btn x" id="modalX">✕</button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div id="printRoot" hidden></div>
+<div id="designRoot" hidden></div>
+
+<!-- ไลบรารี Supabase + ตัวสร้างไฟล์ Excel (โหลดจาก CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* ============================================================
+   ▼▼▼  ตั้งค่าฐานข้อมูลกลางตรงนี้ (ใส่ค่าจากโปรเจกต์ Supabase ของคุณ)  ▼▼▼
+   1) สมัคร supabase.com (ฟรี) → สร้าง Project
+   2) เมนู Project Settings → API : คัดลอก "Project URL" และ "anon public" key
+   3) วางค่าลง 2 บรรทัดล่างนี้ (อยู่ในเครื่องหมายคำพูด)
+   4) รันไฟล์ supabase-setup.sql ในเมนู SQL Editor ของ Supabase 1 ครั้ง
+   ถ้าเว้นว่างไว้ แอปจะทำงานแบบเก็บในเครื่อง (localStorage) เหมือนเดิม
+   ============================================================ */
+   window.SUPABASE_URL      = "";   // เช่น "https://abcdxyz.supabase.co"
+   window.SUPABASE_ANON_KEY = "";   // คีย์ anon public (ยาว ๆ ขึ้นต้น ey...)
+/* ▲▲▲  จบส่วนตั้งค่า  ▲▲▲ */
+</script>
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- storage: Supabase (central) + local fallback ---------------- */
+  var KEY = "stock_app_v4";
+  var DEFAULT_COMPANY = {
+    nameTh:"บริษัท อลอิส โอ.พี.เอส. เคมีคัลส์ จำกัด",
+    nameEn:"ALOIS O.P.S. CHEMICALS CO., LTD.",
+    address:"237/14-18 หมู่ 6 ซ.วัดใหญ่ ถ.บัวคลี่ ต.ราชาเทวะ อ.บางพลี จ.สมุทรปราการ 10540",
+    phone:"02 815-9959", fax:"02 815-9996", email:"info@alois-ops.com",
+    taxId:"0105537008628", logo:"ALOIS O.P.S.", logoImg:"", contactPerson:""
+  };
+  var DEFAULT_PO_TEMPLATE =
+    "<div class='po-hd'>\n"
+    +"  <div>\n"
+    +"    <div class='co-name'>{{company.nameTh}}</div>\n"
+    +"    <div class='co-en'>{{company.nameEn}}</div>\n"
+    +"    <div class='co-addr'>{{company.address}}<br>โทร. {{company.phone}}  แฟกซ์ {{company.fax}}  อีเมล {{company.email}}<br>เลขประจำตัวผู้เสียภาษี {{company.taxId}}</div>\n"
+    +"  </div>\n"
+    +"  <div class='co-logo'>{{logo}}</div>\n"
+    +"</div>\n"
+    +"<div class='po-title'>ใบสั่งซื้อ / PURCHASE ORDER</div>\n"
+    +"<div class='po-meta'>\n"
+    +"  <div class='l'>\n"
+    +"    <div class='row'><span class='k'>ผู้ขาย</span><span class='v'>{{supplier.name}}</span></div>\n"
+    +"    <div class='row'><span class='k'>ที่อยู่</span><span>{{supplier.address}}</span></div>\n"
+    +"    <div class='row'><span class='k'>โทร.</span><span>{{supplier.phone}}</span></div>\n"
+    +"    <div class='row'><span class='k'>ผู้ติดต่อ</span><span>{{supplier.contact}}</span></div>\n"
+    +"  </div>\n"
+    +"  <div>\n"
+    +"    <div class='row'><span class='k'>เลขที่</span><span class='v'>{{po.no}}</span></div>\n"
+    +"    <div class='row'><span class='k'>วันที่</span><span class='v'>{{po.date}}</span></div>\n"
+    +"    <div class='row'><span class='k'>เงื่อนไขชำระเงิน</span><span>{{po.terms}}</span></div>\n"
+    +"    <div class='row'><span class='k'>กำหนดส่ง</span><span>{{po.delivery}}</span></div>\n"
+    +"  </div>\n"
+    +"</div>\n"
+    +"<table class='po-tb'>\n"
+    +"  <thead><tr><th style='width:8%'>ลำดับที่</th><th>รายการ</th><th style='width:14%'>จำนวน</th><th style='width:15%'>หน่วยละ</th><th style='width:18%'>จำนวนเงิน</th></tr></thead>\n"
+    +"  <tbody>\n"
+    +"  {{#items}}<tr><td class='c'>{{no}}</td><td>{{name}} <span style='color:#888'>{{code}}</span></td><td class='c'>{{qty}} {{unit}}</td><td class='r'>{{price}}</td><td class='r'>{{amount}}</td></tr>{{/items}}\n"
+    +"  </tbody>\n"
+    +"  <tfoot>\n"
+    +"    <tr><td colspan='4' class='po-sum-lbl'>รวมเป็นเงิน / TOTAL</td><td class='r'>{{subtotal}}</td></tr>\n"
+    +"    <tr><td colspan='4' class='po-sum-lbl'>ภาษีมูลค่าเพิ่ม 7% / VAT</td><td class='r'>{{vat}}</td></tr>\n"
+    +"    <tr><td colspan='4' class='po-sum-lbl'>จำนวนเงินรวมทั้งสิ้น / GRAND TOTAL</td><td class='r'>{{grand}}</td></tr>\n"
+    +"  </tfoot>\n"
+    +"</table>\n"
+    +"<div class='po-baht'>( {{bahtText}} )</div>\n"
+    +"<div class='po-sign'>\n"
+    +"  <div><div class='ln'></div>ผู้จัดทำ</div>\n"
+    +"  <div><div class='ln'></div>ผู้สั่งซื้อ</div>\n"
+    +"  <div><div class='ln'></div>ผู้อนุมัติ</div>\n"
+    +"</div>\n"
+    +"<div class='po-foot'>การส่งมอบสินค้า: กรุณาแนบใบส่งของ/ใบกำกับภาษีทุกครั้งที่ส่งสินค้า<br>การรับคืนสินค้า: โปรดนำใบวางบิลที่มีลายเซ็นผู้รับมาวางบิลล่วงหน้าด้วย</div>\n";
+  var store = { items: [], suppliers: [], pos: [], docs: [], assets: [], demo:false, company:null, poTemplate:null };
+  var SB = null;          // Supabase client (null = local-only)
+  var dbMode = false;     // true when connected to the shared cloud database
+  var booted = false;     // first full render done
+  var refetchT = null;    // debounce timer for realtime refetch
+  var COLLS = ["items","suppliers","pos","docs","assets"];
+  var TABLE = "records";
+
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e){} }
+  function loadLocal(){
+    try { var raw=localStorage.getItem(KEY); if(raw){ var o=JSON.parse(raw);
+      store.items=o.items||[]; store.suppliers=o.suppliers||[]; store.pos=o.pos||[]; store.docs=o.docs||[]; store.assets=o.assets||[]; store.demo=!!o.demo; store.company=o.company||null; store.poTemplate=o.poTemplate||null; return true; } } catch(e){}
+    return false;
+  }
+  function toJSON(o){ return JSON.parse(JSON.stringify(o)); }
+  function sbErr(err){ if(err){ /* keep app usable */ try{ console.warn("supabase:", err.message||err); }catch(e){} } }
+
+  // one record per row: { id, coll, data(jsonb) }.  meta stored as id "__meta".
+  function upsertRow(coll, obj){ if(SB) SB.from(TABLE).upsert({ id:obj.id, coll:coll, data:toJSON(obj) }).then(function(r){ if(r.error) sbErr(r.error); }); }
+  function deleteRow(id){ if(SB) SB.from(TABLE).delete().eq("id", id).then(function(r){ if(r.error) sbErr(r.error); }); }
+
+  // upsert / delete one record — optimistic local update, then persist (cloud or localStorage)
+  function putRec(coll, obj){
+    var arr=store[coll], i=arr.findIndex(function(x){return x.id===obj.id;});
+    if(i>=0) arr[i]=obj; else arr.push(obj);
+    if(dbMode && SB) upsertRow(coll, obj); else save();
+  }
+  function delRec(coll, id){
+    store[coll]=store[coll].filter(function(x){return x.id!==id;});
+    if(dbMode && SB) deleteRow(id); else save();
+  }
+  function setDemoFlag(v){
+    store.demo=v; updateDemoBadge();
+    if(dbMode && SB) SB.from(TABLE).upsert({ id:"__meta", coll:"meta", data:{ seeded:true, demo:v } }).then(function(r){ if(r.error) sbErr(r.error); });
+    else save();
+  }
+  function allRows(){
+    var rows=[];
+    COLLS.forEach(function(coll){ store[coll].forEach(function(o){ rows.push({ id:o.id, coll:coll, data:toJSON(o) }); }); });
+    rows.push({ id:"__meta", coll:"meta", data:{ seeded:true, demo:!!store.demo } });
+    if(store.company) rows.push({ id:"__company", coll:"meta", data:toJSON(store.company) });
+    if(store.poTemplate) rows.push({ id:"__potemplate", coll:"meta", data:{ html:store.poTemplate } });
+    return rows;
+  }
+  function flushAllToDb(){ if(dbMode && SB) SB.from(TABLE).upsert(allRows()).then(function(r){ if(r.error) sbErr(r.error); }); }
+  function clearAllData(){
+    store.items=[]; store.suppliers=[]; store.pos=[]; store.docs=[]; store.assets=[]; store.demo=false;
+    updateDemoBadge();
+    if(dbMode && SB){
+      SB.from(TABLE).delete().in("coll", COLLS).then(function(r){ if(r.error) sbErr(r.error); });
+      SB.from(TABLE).upsert({ id:"__meta", coll:"meta", data:{ seeded:true, demo:false } }).then(function(r){ if(r.error) sbErr(r.error); });
+    } else save();
+  }
+  // reload sample: wipe cloud rows, then seed fresh
+  function resetToSample(){
+    _seq={};
+    store.items=[]; store.suppliers=[]; store.pos=[]; store.docs=[]; store.assets=[];
+    if(dbMode && SB){
+      return SB.from(TABLE).delete().in("coll", COLLS).then(function(){ seedData(); flushAllToDb(); });
+    } else { seedData(); save(); return Promise.resolve(); }
+  }
+
+  /* connection status chip */
+  function setConn(state){
+    var c=$("#connChip"); if(!c) return;
+    if(state==="db"){ c.textContent="● ฐานข้อมูลกลาง (คลาวด์)"; c.className="conn conn-on"; c.title="ทุกเครื่องที่เปิดลิงก์นี้เห็นข้อมูลชุดเดียวกันแบบเรียลไทม์ ผ่าน Supabase"; }
+    else if(state==="connecting"){ c.textContent="● กำลังเชื่อมต่อ…"; c.className="conn conn-wait"; c.title=""; }
+    else { c.textContent="● เก็บในเครื่องนี้"; c.className="conn conn-off"; c.title="ยังไม่ได้ตั้งค่า Supabase — เก็บข้อมูลเฉพาะเครื่องนี้"; }
+  }
+
+  /* ---------------- realtime sync ---------------- */
+  function rowsIntoStore(rows){
+    var next={ items:[], suppliers:[], pos:[], docs:[], assets:[] }, demo=store.demo, company=store.company, tpl=store.poTemplate;
+    (rows||[]).forEach(function(r){
+      if(r.coll==="meta"){
+        if(r.id==="__meta" && r.data) demo=!!r.data.demo;
+        if(r.id==="__company" && r.data) company=r.data;
+        if(r.id==="__potemplate" && r.data) tpl=r.data.html;
+        return;
+      }
+      if(next[r.coll]) next[r.coll].push(r.data);
+    });
+    store.items=next.items; store.suppliers=next.suppliers; store.pos=next.pos; store.docs=next.docs; store.assets=next.assets; store.demo=demo; store.company=company; store.poTemplate=tpl;
+  }
+  function setCompany(obj){
+    store.company=obj;
+    if(dbMode && SB) SB.from(TABLE).upsert({ id:"__company", coll:"meta", data:toJSON(obj) }).then(function(r){ if(r.error) sbErr(r.error); });
+    else save();
+  }
+  function setPoTemplate(html){
+    store.poTemplate=html;
+    if(dbMode && SB) SB.from(TABLE).upsert({ id:"__potemplate", coll:"meta", data:{ html:html } }).then(function(r){ if(r.error) sbErr(r.error); });
+    else save();
+  }
+  function refetch(){
+    if(!(dbMode && SB)) return Promise.resolve();
+    return SB.from(TABLE).select("*").then(function(res){
+      if(res.error){ sbErr(res.error); return; }
+      rowsIntoStore(res.data);
+      if(booted) renderActive();
+    });
+  }
+  function scheduleRefetch(){ clearTimeout(refetchT); refetchT=setTimeout(refetch, 150); }
+  function subscribeRealtime(){
+    try {
+      SB.channel("stock-records")
+        .on("postgres_changes", { event:"*", schema:"public", table:TABLE }, scheduleRefetch)
+        .subscribe();
+    } catch(e){ sbErr(e); }
+  }
+
+  // re-render the view the user is currently on (called on every remote change)
+  function renderActive(){
+    updateDemoBadge();
+    var tab=document.querySelector("#tabs .tab.active");
+    var v=tab?tab.dataset.view:"dash";
+    if(v==="dash") renderDash();
+    else if(v==="po") renderPO();
+    else if(v==="items") renderItems();
+    else if(v==="reorder") renderReorder();
+    else if(v==="sup") renderSup();
+    else if(v==="hist") renderHist();
+    else if(v==="assets") renderAssets();
+    else if(v==="report"){ if(booted) renderReport(); }
+    else if(v==="tx"){ if(typeof renderPoRef==="function") renderPoRef(); if(typeof updateDocNo==="function") updateDocNo(); }
+  }
+
+  function boot(){
+    booted=true;
+    store.items=store.items||[]; store.suppliers=store.suppliers||[]; store.pos=store.pos||[]; store.docs=store.docs||[]; store.assets=store.assets||[];
+    if(!store.company) store.company = JSON.parse(JSON.stringify(DEFAULT_COMPANY));
+    updateDemoBadge();
+    renderDash();
+  }
+
+  function initData(){
+    setConn("connecting");
+    var url=window.SUPABASE_URL, key=window.SUPABASE_ANON_KEY;
+    var canCloud = url && key && window.supabase && typeof window.supabase.createClient==="function";
+    if(!canCloud){
+      dbMode=false; setConn("local");
+      if(!loadLocal()){ seedData(); save(); }
+      boot();
+      return;
+    }
+    try { SB = window.supabase.createClient(url, key); } catch(e){ SB=null; }
+    if(!SB){ dbMode=false; setConn("local"); if(!loadLocal()){ seedData(); save(); } boot(); return; }
+    dbMode=true; setConn("db");
+    SB.from(TABLE).select("*").then(function(res){
+      if(res.error){ // table/policies not ready → fall back to local, keep app usable
+        sbErr(res.error); dbMode=false; SB=null; setConn("local");
+        if(!loadLocal()){ seedData(); save(); } boot(); return;
+      }
+      var rows=res.data||[];
+      var meta = rows.find(function(r){ return r.id==="__meta"; });
+      rowsIntoStore(rows);
+      subscribeRealtime();
+      if(!meta){
+        // first run: claim the seed lock via an INSERT (fails if someone already inserted)
+        SB.from(TABLE).insert({ id:"__meta", coll:"meta", data:{ seeded:true, demo:true } }).then(function(ins){
+          if(!ins.error){ seedData(); flushAllToDb(); }  // we won the race
+          boot();
+        });
+      } else { boot(); }
+    }, function(err){ sbErr(err); dbMode=false; SB=null; setConn("local"); if(!loadLocal()){ seedData(); save(); } boot(); });
+  }
+
+  /* ---------------- seed data (populate store only; caller persists) ---------------- */
+  function seedData(){
+    store.items = [
+      { id:"i1", code:"OF-001", cat:"office", name:"กระดาษถ่ายเอกสาร A4 80 แกรม", unit:"รีม", min:20, cost:120 },
+      { id:"i2", code:"OF-002", cat:"office", name:"ปากกาลูกลื่น สีน้ำเงิน 0.5", unit:"ด้าม", min:50, cost:5 },
+      { id:"i3", code:"OF-003", cat:"office", name:"หมึกพิมพ์ HP 12A ดำ", unit:"กล่อง", min:5, cost:2500 },
+      { id:"i4", code:"PD-001", cat:"prod", name:"ถุงมือยาง ไซซ์ M", unit:"กล่อง", min:10, cost:180, lead:14, safety:5 },
+      { id:"i5", code:"PD-002", cat:"prod", name:"น้ำยาทำความสะอาดไลน์ผลิต 3.8 ลิตร", unit:"แกลลอน", min:8, cost:250, lead:10, safety:4 },
+      { id:"i6", code:"OF-004", cat:"office", name:"เทปใส 1 นิ้ว", unit:"ม้วน", min:30, cost:15 },
+      { id:"i7", code:"OF-005", cat:"office", name:"แฟ้มสันกว้าง A4", unit:"เล่ม", min:15, cost:35 },
+      { id:"i8", code:"PD-003", cat:"prod", name:"หน้ากากอนามัย 50 ชิ้น", unit:"กล่อง", min:12, cost:95, lead:7, safety:6 }
+    ];
+    store.suppliers = [
+      { id:"s1", code:"SP-01", name:"บจก. ออฟฟิศเมท ซัพพลาย", contact:"คุณสมชาย", phone:"02-111-2222" },
+      { id:"s2", code:"SP-02", name:"ร้านเครื่องเขียนรุ่งเรือง", contact:"คุณมาลี", phone:"081-234-5678" },
+      { id:"s3", code:"SP-03", name:"บจก. คลีนโปร เคมิคอล", contact:"คุณวิชัย", phone:"02-987-6543" }
+    ];
+    // ----- ใบสั่งซื้อ (PO) — เปิดก่อนรับของ -----
+    var po1 = mkPO("2569-08-10","s1","เติมสต็อกประจำเดือน ส.ค.", [["i1",120],["i2",150],["i6",60],["i7",40],["i8",30]]);
+    var po2 = mkPO("2569-09-01","s1","เครื่องเขียน + หมึกพิมพ์", [["i1",50],["i3",12]]);
+    var po3 = mkPO("2569-09-04","s3","อุปกรณ์ทำความสะอาด", [["i4",10],["i5",12]]);
+    var po4 = mkPO("2569-09-06","s2","สั่งเพิ่มปากกา + แฟ้ม", [["i2",100],["i7",50]]);
+    store.pos = [po1, po2, po3, po4];
+
+    // ----- ใบรับ/เบิก/คืน — PU อ้างอิงกลับไปที่ PO -----
+    store.docs = [
+      mkDoc("PU","2569-08-12","s1","","รับครบตาม "+po1.no, [["i1",120],["i2",150],["i6",60],["i7",40],["i8",30]], po1.id),
+      mkDoc("PU","2569-09-02","s1","","รับตาม "+po2.no, [["i1",50],["i3",12]], po2.id),
+      mkDoc("PU","2569-09-05","s3","","รับบางส่วน — ถุงมือมาก่อน", [["i4",10]], po3.id),
+      mkDoc("PD","2569-09-03","","ฝ่ายบัญชี","เบิกใช้ประจำเดือน",[["i1",40],["i2",50],["i7",20]]),
+      mkDoc("PD","2569-09-05","","ฝ่ายผลิต","",[["i4",6],["i8",8]]),
+      mkDoc("RC","2569-09-06","","ฝ่ายบัญชี","คืนของเหลือใช้",[["i7",4]])
+    ];
+    store.assets = [
+      { id:"a1", code:"FA-66-001", name:"เครื่องผสมสารเคมี รุ่น MX-200", cat:"machine", purchaseDate:"2566-03-15", cost:450000, supplierId:"s3", source:"opening", poId:"", poNo:"", location:"โรงงาน ไลน์ A", status:"active", life:10, salvage:20000, note:"", log:[{date:"2566-03-15", text:"ยกยอดทรัพย์สินเดิม (มีอยู่ก่อนหน้า)"},{date:"2567-09-10", text:"บำรุงรักษาประจำปี"}] },
+      { id:"a2", code:"FA-67-014", name:"คอมพิวเตอร์ Dell OptiPlex 7010", cat:"it", purchaseDate:po2.date, cost:22000, supplierId:"s1", source:"po", poId:po2.id, poNo:po2.no, location:"ฝ่ายบัญชี", status:"active", life:5, salvage:1000, note:"", log:[{date:po2.date, text:"รับเข้าตามใบสั่งซื้อ "+po2.no}] },
+      { id:"a3", code:"FA-65-003", name:"รถโฟล์คลิฟท์ Toyota 2.5 ตัน", cat:"vehicle", purchaseDate:"2565-11-20", cost:780000, supplierId:"s3", source:"opening", poId:"", poNo:"", location:"คลังสินค้า", status:"active", life:8, salvage:50000, note:"ทะเบียน 82-1234", log:[{date:"2565-11-20", text:"ยกยอดทรัพย์สินเดิม (มีอยู่ก่อนหน้า)"},{date:"2568-02-05", text:"เปลี่ยนแบตเตอรี่"}] },
+      { id:"a4", code:"FA-68-002", name:"ชุดโต๊ะทำงาน + เก้าอี้ผู้บริหาร", cat:"furniture", purchaseDate:"2568-01-10", cost:8500, supplierId:"s1", source:"opening", poId:"", poNo:"", location:"สำนักงานใหญ่", status:"active", life:5, salvage:0, note:"", log:[{date:"2568-01-10", text:"ยกยอดทรัพย์สินเดิม"}] },
+      { id:"a5", code:"FA-66-020", name:"เครื่องพิมพ์เลเซอร์ HP M404", cat:"it", purchaseDate:"2566-08-05", cost:15000, supplierId:"s2", source:"opening", poId:"", poNo:"", location:"ฝ่ายธุรการ", status:"repair", life:5, salvage:500, note:"", log:[{date:"2566-08-05", text:"ยกยอดทรัพย์สินเดิม"},{date:"2568-08-20", text:"ส่งซ่อมชุดทำความร้อน"}] }
+    ];
+    store.demo = true;
+    if(!store.company) store.company = JSON.parse(JSON.stringify(DEFAULT_COMPANY));
+  }
+
+  var _seq = {};
+  function mkPO(beDate, supId, note, lines){
+    var p = beDate.split("-"); var be2=p[0].slice(-2), mm=p[1];
+    var k="PO"+be2+mm; _seq[k]=(_seq[k]||0)+1;
+    return {
+      id:"p"+Math.random().toString(36).slice(2,9),
+      no:"PO"+be2+mm+String(_seq[k]).padStart(4,"0"),
+      date:beDate, supplierId:supId||"", note:note||"",
+      lines: lines.map(function(l){ return { itemId:l[0], qty:l[1] }; })
+    };
+  }
+  function mkDoc(type, beDate, supId, party, note, lines, poId){
+    // beDate = "YYYY(BE)-MM-DD"
+    var parts = beDate.split("-");
+    var be2 = parts[0].slice(-2), mm = parts[1];
+    var k = type+be2+mm;
+    _seq[k] = (_seq[k]||0)+1;
+    var seq = String(_seq[k]).padStart(4,"0");
+    return {
+      id: "d"+Math.random().toString(36).slice(2,9),
+      no: type+be2+mm+seq,
+      type: type, date: beDate,
+      supplierId: supId||"", party: party||"", note: note||"", poId: poId||"",
+      lines: lines.map(function(l){ return { itemId:l[0], qty:l[1] }; })
+    };
+  }
+
+  /* ---------------- helpers ---------------- */
+  function uid(p){ return (p||"x")+Math.random().toString(36).slice(2,9); }
+  function beYear(d){ return d.getFullYear()+543; }
+  function todayISO(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function todayBE(){ var d=new Date(); return beYear(d)+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function pad(n){ return String(n).padStart(2,"0"); }
+  function itemById(id){ return store.items.find(function(x){return x.id===id;}); }
+  function supById(id){ return store.suppliers.find(function(x){return x.id===id;}); }
+  var THMON = ["","ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+  function fmtDate(be){ // be = "YYYY(BE)-MM-DD"
+    var p = be.split("-"); return parseInt(p[2],10)+" "+THMON[parseInt(p[1],10)]+" "+p[0];
+  }
+  function typeLabel(t){ return t==="PU"?"รับเข้า":t==="RC"?"รับคืน":"เบิกจ่าย"; }
+  function typeSign(t){ return t==="PD"?-1:1; }
+  function nfmt(n){ return Number(n).toLocaleString("en-US"); }
+  function money(n){ return "฿"+Number(n||0).toLocaleString("en-US",{maximumFractionDigits:2}); }
+
+  var CATS = {
+    office: { name:"อุปกรณ์สำนักงาน",       short:"สำนักงาน", dot:"dot-office" },
+    prod:   { name:"อุปกรณ์สิ้นเปลือง (ผลิต)", short:"ผลิต",     dot:"dot-prod" }
+  };
+  function catMeta(id){ return CATS[id] || { name:"ไม่ระบุหมวด", short:"—", dot:"" }; }
+  function catChip(id){ var m=catMeta(id); return "<span class='chip-cat'><span class='dot "+m.dot+"'></span>"+esc(m.short)+"</span>"; }
+  function stockValue(it){ return balance(it.id) * Number(it.cost||0); }
+
+  /* ---- reorder point (auto, from real usage) ---- */
+  var reorderWindow = 90; // ช่วงวันที่ใช้คำนวณอัตราการเบิก
+  function beToDate(be){ var p=(be||"").split("-"); if(p.length<3) return null; return new Date(parseInt(p[0],10)-543, parseInt(p[1],10)-1, parseInt(p[2],10)); }
+  function avgDailyUsage(itemId, windowDays){
+    windowDays = windowDays || reorderWindow;
+    var cutoff = new Date(); cutoff.setDate(cutoff.getDate()-windowDays);
+    var sum=0;
+    store.docs.forEach(function(d){
+      if(d.type!=="PD") return;
+      var dt=beToDate(d.date); if(!dt || dt<cutoff) return;
+      d.lines.forEach(function(l){ if(l.itemId===itemId) sum+=Number(l.qty); });
+    });
+    return sum / windowDays;
+  }
+  // จุดสั่งซื้อ: prod = ceil(อัตราใช้/วัน × lead) + safety ; office/ไม่ตั้งค่า = ขั้นต่ำ
+  function reorderPoint(it, windowDays){
+    if((it.cat||"")!=="prod") return Number(it.min||0);
+    var lead=Number(it.lead||0), safety=Number(it.safety||0);
+    if(lead===0 && safety===0) return Number(it.min||0);
+    return Math.ceil(avgDailyUsage(it.id, windowDays)*lead) + safety;
+  }
+  function reorderStatus(it, windowDays){
+    var b=balance(it.id), rop=reorderPoint(it, windowDays);
+    if(b < rop) return "must";
+    if(b <= Math.ceil(rop*1.3)) return "near";
+    return "ok";
+  }
+  var RE_STATUS = {
+    must: { label:"ควรสั่งซื้อ", cls:"st-danger" },
+    near: { label:"ใกล้จุดสั่ง",  cls:"st-warn" },
+    ok:   { label:"พอใช้",        cls:"st-ok" }
+  };
+  function statHtml(s){
+    var val=(s.display!=null)?s.display:nfmt(s.value);
+    return '<div class="stat'+(s.alert?' alert':'')+'"'+(s.goto?' data-goto="'+s.goto+'" style="cursor:pointer"':'')+'>'
+      +'<div class="label">'+esc(s.label)+'</div>'
+      +'<div class="value num'+(s.display!=null?' baht':'')+'">'+val+'</div>'
+      +'<div class="foot">'+esc(s.foot)+'</div></div>';
+  }
+
+  /* ---- assets ---- */
+  var ASSET_CATS = {
+    machine:  { name:"เครื่องจักร / อุปกรณ์ผลิต", short:"เครื่องจักร" },
+    it:       { name:"คอมพิวเตอร์ / ไอที",        short:"ไอที" },
+    office:   { name:"เครื่องใช้สำนักงาน",         short:"สำนักงาน" },
+    vehicle:  { name:"ยานพาหนะ",                   short:"ยานพาหนะ" },
+    furniture:{ name:"เฟอร์นิเจอร์",               short:"เฟอร์นิเจอร์" },
+    other:    { name:"อื่น ๆ",                     short:"อื่น ๆ" }
+  };
+  function assetCatName(id){ return (ASSET_CATS[id]||{name:"ไม่ระบุ"}).name; }
+  var ASSET_STATUS = {
+    active: { label:"ใช้งาน",      cls:"st-ok" },
+    repair: { label:"ซ่อมบำรุง",   cls:"st-warn" },
+    retired:{ label:"จำหน่ายแล้ว", cls:"st-partial" }
+  };
+  function assetById(id){ return (store.assets||[]).find(function(x){return x.id===id;}); }
+  function assetAgeYears(a){ var d=beToDate(a.purchaseDate); if(!d) return 0; return Math.max(0,(Date.now()-d.getTime())/(365.25*86400000)); }
+  function bookValue(a){
+    var cost=Number(a.cost||0), life=Number(a.life||0), salv=Number(a.salvage||0);
+    if(life<=0) return cost;
+    var dep=Math.min(assetAgeYears(a)/life,1)*(cost-salv);
+    return Math.max(salv, cost-dep);
+  }
+  function accumDep(a){ return Number(a.cost||0)-bookValue(a); }
+
+  // current stock balance for an item
+  function balance(itemId){
+    var b = 0;
+    store.docs.forEach(function(d){
+      var s = typeSign(d.type);
+      d.lines.forEach(function(l){ if(l.itemId===itemId) b += s*Number(l.qty); });
+    });
+    return b;
+  }
+
+  // next running doc number for type on a BE date
+  function nextDocNo(type, beDate){
+    if(!beDate) return "—";
+    var p = beDate.split("-");
+    if(p.length<3) return "—";
+    var be2 = p[0].slice(-2), mm = p[1];
+    var prefix = type+be2+mm;
+    var max = 0;
+    function scan(arr){ (arr||[]).forEach(function(d){
+      if(d.no && d.no.indexOf(prefix)===0){
+        var s = parseInt(d.no.slice(prefix.length),10);
+        if(!isNaN(s) && s>max) max=s;
+      }
+    }); }
+    scan(store.docs); scan(store.pos);
+    return prefix+String(max+1).padStart(4,"0");
+  }
+
+  /* ---------------- PO helpers ---------------- */
+  function poById(id){ return (store.pos||[]).find(function(x){return x.id===id;}); }
+  function poReceived(poId){
+    var m={};
+    store.docs.forEach(function(d){
+      if(d.type==="PU" && d.poId===poId){
+        d.lines.forEach(function(l){ m[l.itemId]=(m[l.itemId]||0)+Number(l.qty); });
+      }
+    });
+    return m;
+  }
+  function poStatus(po){
+    var rec=poReceived(po.id), any=false, allDone=true;
+    po.lines.forEach(function(l){
+      var r=rec[l.itemId]||0;
+      if(r>0) any=true;
+      if(r < Number(l.qty)) allDone=false;
+    });
+    if(allDone) return "complete";
+    return any ? "partial" : "open";
+  }
+  function poRemaining(po){
+    var rec=poReceived(po.id);
+    return po.lines.map(function(l){
+      return { itemId:l.itemId, qty: Math.max(0, Number(l.qty)-(rec[l.itemId]||0)) };
+    }).filter(function(l){ return l.qty>0; });
+  }
+  function poTotals(po){
+    var rec=poReceived(po.id), ord=0, got=0;
+    po.lines.forEach(function(l){ ord+=Number(l.qty); got+=Math.min(Number(l.qty), rec[l.itemId]||0); });
+    return { ord:ord, got:got, pct: ord? Math.round(got/ord*100):0 };
+  }
+  function poAmount(po){ return po.lines.reduce(function(a,l){ var it=itemById(l.itemId); return a + Number(l.qty)*Number(it?it.cost||0:0); },0); }
+  var PO_STATUS = {
+    open:     { label:"รอรับของ",   cls:"st-open" },
+    partial:  { label:"รับบางส่วน", cls:"st-partial" },
+    complete: { label:"รับครบแล้ว", cls:"st-complete" }
+  };
+  function poStatusPill(po){
+    var st=poStatus(po), m=PO_STATUS[st];
+    return "<span class='pill "+m.cls+"'><span class='dot'></span>"+m.label+"</span>";
+  }
+
+  /* ---------------- DOM utils ---------------- */
+  function $(s){ return document.querySelector(s); }
+  function $$(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); }
+  function el(html){ var t=document.createElement("template"); t.innerHTML=html.trim(); return t.content.firstChild; }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+
+  var toastT;
+  function toast(msg){
+    var t=$("#toast"); t.innerHTML="✓ "+esc(msg); t.classList.add("show");
+    clearTimeout(toastT); toastT=setTimeout(function(){ t.classList.remove("show"); },2200);
+  }
+
+  /* ---------------- theme ---------------- */
+  (function(){
+    var saved; try { saved = localStorage.getItem("stock_theme"); } catch(e){}
+    if(saved) document.documentElement.setAttribute("data-theme", saved);
+    $("#themeBtn").addEventListener("click", function(){
+      var cur = document.documentElement.getAttribute("data-theme");
+      var next = cur==="dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try { localStorage.setItem("stock_theme", next); } catch(e){}
+    });
+  })();
+
+  /* ---------------- navigation ---------------- */
+  function showView(v){
+    $$(".view").forEach(function(s){ s.hidden = (s.id !== "view-"+v); });
+    $$("#tabs .tab").forEach(function(t){ t.classList.toggle("active", t.dataset.view===v); });
+    window.scrollTo({top:0, behavior:"smooth"});
+    if(v==="dash") renderDash();
+    if(v==="po") renderPO();
+    if(v==="items") renderItems();
+    if(v==="reorder") renderReorder();
+    if(v==="sup") renderSup();
+    if(v==="hist") renderHist();
+    if(v==="assets") renderAssets();
+    if(v==="report") ensureReport();
+    if(v==="tx") ensureTxForm();
+  }
+  $("#tabs").addEventListener("click", function(e){
+    var b=e.target.closest(".tab"); if(b) showView(b.dataset.view);
+  });
+  document.addEventListener("click", function(e){
+    var g=e.target.closest("[data-goto]"); if(g) showView(g.dataset.goto);
+  });
+
+  /* ---------------- dashboard ---------------- */
+  function renderDash(){
+    var d=new Date();
+    $("#dashDate").textContent = "ข้อมูล ณ วันที่ "+d.getDate()+" "+THMON[d.getMonth()+1]+" "+beYear(d);
+
+    var curBE = String(beYear(d)).slice(-2)+pad(d.getMonth()+1);
+    var inDocs=0, outDocs=0;
+    store.docs.forEach(function(doc){
+      var mkey = doc.no.replace(/^(PU|RC|PD)/,"").slice(0,4);
+      if(mkey===curBE){ if(doc.type==="PD") outDocs++; else inDocs++; }
+    });
+    var low = store.items.filter(function(it){ return balance(it.id) < reorderPoint(it); });
+    var poOpen = (store.pos||[]).filter(function(p){ return poStatus(p)!=="complete"; }).length;
+    var totalVal = store.items.reduce(function(a,it){ return a+stockValue(it); },0);
+
+    var stats=[
+      {label:"วัสดุทั้งหมด", value:store.items.length, foot:"รายการในระบบ"},
+      {label:"ต่ำกว่าจุดสั่งซื้อ", value:low.length, foot:"ควรสั่งซื้อเพิ่ม", alert:low.length>0, goto:"reorder"},
+      {label:"PO ค้างรับของ", value:poOpen, foot:"รอรับ / รับบางส่วน", goto:"po"},
+      {label:"มูลค่าสต็อกรวม", display:money(totalVal), foot:"ตามต้นทุน/หน่วยปัจจุบัน", goto:"items"},
+      {label:"รับเข้าเดือนนี้", value:inDocs, foot:"เอกสาร PU + RC"},
+      {label:"เบิกจ่ายเดือนนี้", value:outDocs, foot:"เอกสาร PD"},
+      {label:"ทรัพย์สิน", value:(store.assets||[]).length, foot:"รายการทะเบียนทรัพย์สิน", goto:"assets"}
+    ];
+    $("#statRow").innerHTML = stats.map(statHtml).join("");
+
+    // low stock table
+    var lc=$("#lowCount"); lc.textContent = low.length? (low.length+" รายการ") : "";
+    if(low.length===0){
+      $("#lowStock").innerHTML = '<div class="empty">ทุกรายการมีสต็อกเพียงพอ 👍</div>';
+    } else {
+      $("#lowStock").innerHTML = tbl(
+        ["วัสดุ",{c:"right",h:"คงเหลือ"},{c:"right",h:"จุดสั่งซื้อ"},{c:"center",h:"หน่วย"}],
+        low.sort(function(a,b){return (balance(a.id)-reorderPoint(a))-(balance(b.id)-reorderPoint(b));}).map(function(it){
+          var b=balance(it.id);
+          return ["<div><strong>"+esc(it.name)+"</strong><br><span class='muted mono' style='font-size:12px'>"+esc(it.code)+"</span> "+catChip(it.cat)+"</div>",
+            {c:"right", h:"<span class='stock-pill stock-low'>"+nfmt(b)+"</span>"},
+            {c:"right num", h:nfmt(reorderPoint(it))},
+            {c:"center muted", h:esc(it.unit)}];
+        })
+      );
+    }
+
+    // recent docs
+    var recent = store.docs.slice().sort(function(a,b){ return b.no<a.no?-1:1; }).slice(0,7);
+    $("#recentDocs").innerHTML = tbl(
+      ["เลขที่","ประเภท","รายการ","วันที่"],
+      recent.map(function(doc){
+        return [
+          "<span class='doc-no' style='color:var(--"+doc.type.toLowerCase()+")'>"+esc(doc.no)+"</span>",
+          {h:pill(doc.type)},
+          {c:"num muted", h:doc.lines.length+" รายการ"},
+          {c:"muted", h:fmtDate(doc.date)}
+        ];
+      })
+    );
+  }
+
+  function pill(t){ return "<span class='pill "+t.toLowerCase()+"'><span class='dot'></span>"+typeLabel(t)+"</span>"; }
+
+  // generic table builder. rows = array of cells; cell = string OR {h, c(class)}
+  function tbl(headers, rows, opts){
+    opts=opts||{};
+    if(rows.length===0) return '<div class="empty">'+(opts.empty||"ยังไม่มีข้อมูล")+'</div>';
+    var h="<table><thead><tr>"+headers.map(function(x){
+      var c=(typeof x==="object")?(x.c||""):""; var t=(typeof x==="object")?x.h:x;
+      return "<th class='"+c+"'>"+t+"</th>";
+    }).join("")+"</tr></thead><tbody>";
+    h+=rows.map(function(r){
+      var attr = r._attr||"";
+      return "<tr "+attr+">"+r.filter(function(c){return c!==undefined;}).map(function(c){
+        if(typeof c==="object" && c!==null) return "<td class='"+(c.c||"")+"'>"+c.h+"</td>";
+        return "<td>"+c+"</td>";
+      }).join("")+"</tr>";
+    }).join("");
+    return h+"</tbody></table>";
+  }
+
+  /* ---------------- items ---------------- */
+  var itemF="ALL", itemQ="";
+  $("#itemFilter").addEventListener("click", function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    itemF=b.dataset.f;
+    $$("#itemFilter button").forEach(function(x){ x.classList.toggle("active", x===b); });
+    renderItems();
+  });
+  $("#itemSearch").addEventListener("input", function(e){ itemQ=e.target.value.trim().toLowerCase(); renderItems(); });
+
+  function renderItems(){
+    var list = store.items.filter(function(it){
+      if(itemF!=="ALL" && (it.cat||"")!==itemF) return false;
+      if(itemQ && (it.name+" "+it.code).toLowerCase().indexOf(itemQ)<0) return false;
+      return true;
+    });
+    var totalVal=0;
+    var rows = list.map(function(it){
+      var b=balance(it.id); var rop=reorderPoint(it); var low=b<rop; var val=stockValue(it); totalVal+=val;
+      var ropCell = nfmt(rop) + (it.cat==="prod" ? " <span class='muted' style='font-size:10px' title='คำนวณอัตโนมัติจากการใช้จริง'>⚙</span>" : "");
+      return [
+        "<span class='mono muted'>"+esc(it.code)+"</span>",
+        "<div><strong>"+esc(it.name)+"</strong><br>"+catChip(it.cat)+"</div>",
+        {c:"center muted", h:esc(it.unit)},
+        {c:"right baht", h:money(it.cost)},
+        {c:"right num muted", h:ropCell},
+        {c:"right", h:"<span class='stock-pill "+(low?"stock-low":"stock-ok")+"'>"+nfmt(b)+"</span>"},
+        {c:"right baht", h:money(val)},
+        {c:"right", h:"<button class='btn sm' data-edit-item='"+it.id+"'>แก้ไข</button> "
+          +"<button class='btn danger sm' data-del-item='"+it.id+"'>ลบ</button>"}
+      ];
+    });
+    var emptyMsg = store.items.length===0 ? "ยังไม่มีวัสดุ — กด “+ เพิ่มวัสดุ” เพื่อเพิ่มรายการของคุณ" : "ไม่พบวัสดุตามเงื่อนไข";
+    var table = tbl(
+      ["รหัส","ชื่อวัสดุ / หมวดหมู่",{c:"center",h:"หน่วย"},{c:"right",h:"ต้นทุน/หน่วย"},{c:"right",h:"จุดสั่งซื้อ"},{c:"right",h:"คงเหลือ"},{c:"right",h:"มูลค่าคงเหลือ"},{c:"right",h:""}],
+      rows, {empty:emptyMsg}
+    );
+    var foot = list.length ? "<div style='display:flex; justify-content:flex-end; gap:10px; align-items:baseline; padding:14px 16px; border-top:1px solid var(--line)'>"
+      +"<span class='muted' style='font-size:13px'>รวมมูลค่าสต็อก"+(itemF!=="ALL"?" ("+catMeta(itemF).short+")":"")+"</span>"
+      +"<strong class='baht' style='font-size:17px; color:var(--accent)'>"+money(totalVal)+"</strong></div>" : "";
+    $("#itemsTable").innerHTML = table + foot;
+  }
+
+  function itemModal(it){
+    var edit=!!it; it=it||{code:"",name:"",unit:"",min:0,cat:"office",cost:0,lead:0,safety:0};
+    var catOpts = Object.keys(CATS).map(function(k){
+      return "<option value='"+k+"'"+((it.cat||"office")===k?" selected":"")+">"+esc(CATS[k].name)+"</option>"; }).join("");
+    openModal(edit?"แก้ไขวัสดุ":"เพิ่มวัสดุ",
+      '<div class="form-grid">'
+      +field("รหัสวัสดุ","<input type=text id=m_code value=\""+esc(it.code)+"\" placeholder=\"เช่น OF-001\">")
+      +field("หมวดหมู่","<select id=m_cat>"+catOpts+"</select>")
+      +'</div>'
+      +field("ชื่อวัสดุ *","<input type=text id=m_name value=\""+esc(it.name)+"\" placeholder=\"ชื่อรายการวัสดุ\">")
+      +'<div class="form-grid">'
+      +field("หน่วยนับ","<input type=text id=m_unit value=\""+esc(it.unit)+"\" placeholder=\"ชิ้น / กล่อง / รีม\">")
+      +field("ต้นทุน/หน่วย (บาท) <span class='hint'>— แก้ไขได้เมื่อราคาเปลี่ยน</span>","<input type=number id=m_cost min=0 step=0.01 value=\""+(it.cost||0)+"\">")
+      +'</div>'
+      +field("จำนวนขั้นต่ำ <span class='hint'>— จุดสั่งซื้อสำหรับหมวดสำนักงาน</span>","<input type=number id=m_min min=0 value=\""+(it.min||0)+"\">")
+      +'<div id="m_prodBox" style="border:1px solid var(--line-strong); border-radius:10px; padding:14px; background:var(--surface-2)">'
+        +'<div style="font-size:13px; font-weight:700; margin-bottom:3px">จุดสั่งซื้ออัตโนมัติ <span class="chip-cat" style="vertical-align:middle"><span class="dot dot-prod"></span>เฉพาะหมวดผลิต</span></div>'
+        +'<p class="muted" style="margin:0 0 12px; font-size:12px">ระบบคำนวณจากอัตราการเบิกจ่ายจริง เพื่อบอกว่าควรสั่งซื้อเมื่อสต็อกต่ำกว่าเท่าไร</p>'
+        +'<div class="form-grid">'
+          +field("ระยะเวลารอของ (วัน) <span class='hint'>— lead time</span>","<input type=number id=m_lead min=0 value=\""+(it.lead||0)+"\">")
+          +field("สต็อกเผื่อ (safety)","<input type=number id=m_safety min=0 value=\""+(it.safety||0)+"\">")
+        +'</div>'
+        +'<p class="muted" id="m_ropHint" style="margin:12px 0 0; font-size:12.5px; line-height:1.5"></p>'
+      +'</div>',
+      [{label:"ยกเลิก", cls:""},{label:edit?"บันทึก":"เพิ่มวัสดุ", cls:"primary", fn:function(){
+        var name=$("#m_name").value.trim();
+        if(!name){ shake("#m_name"); return false; }
+        var obj={ id: edit?it.id:uid("i"), code:$("#m_code").value.trim()||"-", cat:$("#m_cat").value, name:name,
+          unit:$("#m_unit").value.trim()||"หน่วย", cost:Math.max(0,parseFloat($("#m_cost").value)||0),
+          min:parseInt($("#m_min").value,10)||0,
+          lead:parseInt($("#m_lead").value,10)||0, safety:parseInt($("#m_safety").value,10)||0 };
+        userTouched(); putRec("items", obj); renderItems(); renderDash(); if(!$("#view-reorder").hidden) renderReorder(); toast(edit?"แก้ไขวัสดุแล้ว":"เพิ่มวัสดุแล้ว");
+      }}]
+    );
+    function updateRopHint(){
+      var lead=parseInt($("#m_lead").value,10)||0, safety=parseInt($("#m_safety").value,10)||0;
+      var avgD = edit ? avgDailyUsage(it.id) : 0;
+      var rop = Math.ceil(avgD*lead)+safety;
+      var unit = $("#m_unit").value.trim()||"หน่วย";
+      $("#m_ropHint").innerHTML = "อัตราใช้เฉลี่ย ~<strong>"+avgD.toFixed(2)+"</strong>/วัน × "+lead+" วัน + เผื่อ "+safety
+        +" = <strong style='color:var(--accent)'>จุดสั่งซื้อ ≈ "+rop+" "+esc(unit)+"</strong>"
+        +(edit?"":"<br><span style='color:var(--ink-faint)'>ยังไม่มีประวัติการเบิก ระบบจะเริ่มคำนวณอัตราใช้เมื่อมีการเบิกจ่าย</span>");
+    }
+    function toggleProd(){ var isP=$("#m_cat").value==="prod"; $("#m_prodBox").hidden=!isP; if(isP) updateRopHint(); }
+    $("#m_cat").addEventListener("change", toggleProd);
+    $("#m_lead").addEventListener("input", updateRopHint);
+    $("#m_safety").addEventListener("input", updateRopHint);
+    toggleProd();
+  }
+
+  /* ---------------- reorder point (prod) ---------------- */
+  $("#reorderWindowSel").addEventListener("change", function(e){ reorderWindow=parseInt(e.target.value,10)||90; renderReorder(); });
+
+  function renderReorder(){
+    var w=reorderWindow, order={must:0,near:1,ok:2};
+    var list = store.items.filter(function(it){ return (it.cat||"")==="prod"; })
+      .sort(function(a,b){
+        var sa=reorderStatus(a,w), sb=reorderStatus(b,w);
+        if(order[sa]!==order[sb]) return order[sa]-order[sb];
+        return (balance(a.id)-reorderPoint(a,w)) - (balance(b.id)-reorderPoint(b,w));
+      });
+    var mustN=list.filter(function(it){ return reorderStatus(it,w)==="must"; }).length;
+    var nearN=list.filter(function(it){ return reorderStatus(it,w)==="near"; }).length;
+    $("#reorderStats").innerHTML=[
+      {label:"ควรสั่งซื้อ", value:mustN, foot:"ต่ำกว่าจุดสั่งซื้อ", alert:mustN>0},
+      {label:"ใกล้จุดสั่งซื้อ", value:nearN, foot:"เฝ้าระวัง"},
+      {label:"รายการสิ้นเปลือง (ผลิต)", value:list.length, foot:"ทั้งหมดในหมวดนี้"}
+    ].map(statHtml).join("");
+    var rows=list.map(function(it){
+      var b=balance(it.id), rop=reorderPoint(it,w), st=reorderStatus(it,w), m=RE_STATUS[st];
+      var perMonth=avgDailyUsage(it.id,w)*30;
+      return [
+        "<div><strong>"+esc(it.name)+"</strong><br><span class='muted mono' style='font-size:12px'>"+esc(it.code)+"</span></div>",
+        {c:"right", h:"<span class='stock-pill "+(b<rop?"stock-low":"stock-ok")+"'>"+nfmt(b)+"</span>"},
+        {c:"center muted", h:esc(it.unit)},
+        {c:"right num muted", h:perMonth.toFixed(1)},
+        {c:"right num muted", h:nfmt(it.lead||0)},
+        {c:"right num muted", h:nfmt(it.safety||0)},
+        {c:"right num", h:"<strong>"+nfmt(rop)+"</strong>"},
+        {h:"<span class='pill "+m.cls+"'><span class='dot'></span>"+m.label+"</span>"},
+        {c:"right", h:"<button class='btn sm' data-edit-item='"+it.id+"'>ตั้งค่า</button>"}
+      ];
+    });
+    $("#reorderTable").innerHTML = tbl(
+      ["วัสดุ",{c:"right",h:"คงเหลือ"},{c:"center",h:"หน่วย"},{c:"right",h:"ใช้/เดือน"},{c:"right",h:"lead (วัน)"},{c:"right",h:"เผื่อ"},{c:"right",h:"จุดสั่งซื้อ"},"สถานะ",{c:"right",h:""}],
+      rows, {empty:"ยังไม่มีวัสดุหมวดสิ้นเปลือง (ผลิต) — เพิ่มวัสดุแล้วเลือกหมวด ‘อุปกรณ์สิ้นเปลือง (ผลิต)’"}
+    );
+  }
+
+  /* ---------------- suppliers ---------------- */
+  function renderSup(){
+    var rows = store.suppliers.map(function(s){
+      return [
+        "<span class='mono muted'>"+esc(s.code)+"</span>",
+        "<strong>"+esc(s.name)+"</strong>",
+        {c:"muted", h:esc(s.contact||"-")},
+        {c:"mono muted", h:esc(s.phone||"-")},
+        {c:"right", h:"<button class='btn sm' data-edit-sup='"+s.id+"'>แก้ไข</button> "
+          +"<button class='btn danger sm' data-del-sup='"+s.id+"'>ลบ</button>"}
+      ];
+    });
+    $("#supTable").innerHTML = tbl(
+      ["รหัส","ชื่อซัพพลายเออร์","ผู้ติดต่อ","โทรศัพท์",{c:"right",h:""}],
+      rows, {empty:"ยังไม่มีซัพพลายเออร์"}
+    );
+  }
+
+  function supModal(s){
+    var edit=!!s; s=s||{code:"",name:"",contact:"",phone:"",address:""};
+    openModal(edit?"แก้ไขซัพพลายเออร์":"เพิ่มซัพพลายเออร์",
+      field("รหัส","<input type=text id=s_code value=\""+esc(s.code)+"\" placeholder=\"เช่น SP-01\">")
+      +field("ชื่อซัพพลายเออร์ / คู่ค้า *","<input type=text id=s_name value=\""+esc(s.name)+"\">")
+      +field("ที่อยู่ <span class='hint'>— ใช้ในใบสั่งซื้อ</span>","<textarea id=s_address placeholder='ที่อยู่สำหรับออกใบสั่งซื้อ'>"+esc(s.address||"")+"</textarea>")
+      +'<div class="form-grid">'
+      +field("ผู้ติดต่อ","<input type=text id=s_contact value=\""+esc(s.contact)+"\">")
+      +field("โทรศัพท์","<input type=text id=s_phone value=\""+esc(s.phone)+"\">")
+      +'</div>',
+      [{label:"ยกเลิก"},{label:edit?"บันทึก":"เพิ่ม", cls:"primary", fn:function(){
+        var name=$("#s_name").value.trim();
+        if(!name){ shake("#s_name"); return false; }
+        var obj={ id: edit?s.id:uid("s"), code:$("#s_code").value.trim()||"-", name:name, address:$("#s_address").value.trim(), contact:$("#s_contact").value.trim(), phone:$("#s_phone").value.trim() };
+        userTouched(); putRec("suppliers", obj); renderSup(); toast(edit?"แก้ไขแล้ว":"เพิ่มซัพพลายเออร์แล้ว");
+      }}]
+    );
+  }
+
+  /* ---------------- purchase orders ---------------- */
+  var poF="ALL", poQ="";
+  $("#poFilter").addEventListener("click", function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    poF=b.dataset.f;
+    $$("#poFilter button").forEach(function(x){ x.classList.toggle("active", x===b); });
+    renderPO();
+  });
+  $("#poSearch").addEventListener("input", function(e){ poQ=e.target.value.trim().toLowerCase(); renderPO(); });
+  $("#addPoBtn").addEventListener("click", function(){ poModal(); });
+
+  function renderPO(){
+    var list = (store.pos||[]).slice().sort(function(a,b){ return b.no<a.no?-1:1; });
+    if(poF!=="ALL") list=list.filter(function(p){ return poStatus(p)===poF; });
+    if(poQ){
+      list=list.filter(function(p){
+        var s=supById(p.supplierId);
+        if(p.no.toLowerCase().indexOf(poQ)>=0) return true;
+        if(s && s.name.toLowerCase().indexOf(poQ)>=0) return true;
+        return p.lines.some(function(l){ var it=itemById(l.itemId); return it && it.name.toLowerCase().indexOf(poQ)>=0; });
+      });
+    }
+    var rows=list.map(function(po){
+      var s=supById(po.supplierId), t=poTotals(po), st=poStatus(po);
+      var actions="";
+      if(st!=="complete") actions+="<button class='btn primary sm' data-receive='"+po.id+"'>รับของ</button> ";
+      actions+="<button class='btn sm' data-po='"+po.id+"'>ดู</button> ";
+      actions+="<button class='btn sm' data-printpo='"+po.id+"' title='พิมพ์ใบสั่งซื้อ'>🖨</button>";
+      var r=[
+        "<span class='doc-no' style='color:var(--po)'>"+esc(po.no)+"</span>",
+        esc(s?s.name:"-"),
+        {c:"muted", h:fmtDate(po.date)},
+        {c:"num muted", h:po.lines.length+" รายการ"},
+        {c:"right baht", h:money(poAmount(po))},
+        {h:poStatusPill(po)},
+        {h:"<div style='display:flex; align-items:center; gap:8px'><div class='pbar"+(t.pct>=100?" done":"")+"' title='"+t.got+"/"+t.ord+"'><span style='width:"+t.pct+"%'></span></div><span class='muted num' style='font-size:12px'>"+t.pct+"%</span></div>"},
+        {c:"right", h:actions}
+      ];
+      return r;
+    });
+    $("#poTable").innerHTML = tbl(
+      ["เลขที่ PO","ซัพพลายเออร์","วันที่",{c:"num",h:"รายการ"},{c:"right",h:"ยอดเงิน"},"สถานะ","ความคืบหน้า",{c:"right",h:""}],
+      rows, {empty:"ยังไม่มีใบสั่งซื้อ กด “สร้างใบสั่งซื้อ” เพื่อเริ่ม"}
+    );
+  }
+
+  // create-PO modal (dynamic line editor lives inside #modalBody)
+  var poDraft = { lines:[{itemId:"",qty:""}] };
+  function poModal(){
+    poDraft = { lines:[{itemId:"",qty:""}] };
+    var opts = store.suppliers.map(function(s){ return "<option value='"+s.id+"'>"+esc(s.name)+"</option>"; }).join("");
+    var body =
+      '<div class="doc-preview"><span class="lbl">เลขที่ใบสั่งซื้อ (อัตโนมัติ)</span><span class="no" id="poNoPreview" style="color:var(--po)">—</span></div>'
+      +'<div class="form-grid">'
+        +field("วันที่ *","<input type=date id=poDate>")
+        +field("ซัพพลายเออร์ *","<select id=poSupplier>"+(opts||"<option value=''>— ยังไม่มีซัพพลายเออร์ —</option>")+"</select>")
+      +'</div>'
+      +'<div class="form-grid">'
+        +field("เงื่อนไขการชำระเงิน","<input type=text id=poTerms value='30 วัน'>")
+        +field("กำหนดส่ง","<input type=text id=poDelivery placeholder='(ถ้ามี)'>")
+      +'</div>'
+      +'<div class="field"><div style="display:flex;align-items:center"><label>รายการที่สั่งซื้อ *</label>'
+        +'<button type="button" class="btn ghost sm" id="poAddLine" style="margin-left:auto">+ เพิ่มบรรทัด</button></div>'
+        +'<div class="lines-head"><span>วัสดุ</span><span>จำนวนสั่ง</span><span></span></div>'
+        +'<div class="lines" id="poLines"></div>'
+        +'<div id="poTotalBar" style="display:flex; justify-content:flex-end; gap:10px; align-items:baseline; margin-top:12px; font-size:13px"></div></div>'
+      +field("หมายเหตุ","<textarea id=poNote placeholder='เลขที่ PO อ้างอิง / เงื่อนไข ฯลฯ'></textarea>");
+    openModal("สร้างใบสั่งซื้อ (PO)", body, [
+      {label:"ยกเลิก"},
+      {label:"สร้างใบสั่งซื้อ", cls:"primary", fn:savePO}
+    ]);
+    $("#poDate").value = todayISO();
+    renderPoLines(); refreshPoNo();
+  }
+  function refreshPoNo(){
+    var iso=$("#poDate") && $("#poDate").value;
+    var be = iso ? (parseInt(iso.split("-")[0],10)+543)+"-"+iso.split("-")[1]+"-"+iso.split("-")[2] : "";
+    var pv=$("#poNoPreview"); if(pv) pv.textContent = nextDocNo("PO", be);
+  }
+  function renderPoLines(){
+    var wrap=$("#poLines"); if(!wrap) return;
+    wrap.innerHTML = poDraft.lines.map(function(l,i){
+      return "<div class='line-row' data-i='"+i+"'>"
+        +"<select class='po-item'>"+itemOptions(l.itemId)+"</select>"
+        +"<input type='number' class='po-qty' min='1' placeholder='0' value='"+(l.qty||"")+"'>"
+        +"<button type='button' class='rm po-rm' title='ลบบรรทัด'>✕</button></div>";
+    }).join("");
+    updatePoTotal();
+  }
+  function updatePoTotal(){
+    var tb=$("#poTotalBar"); if(!tb) return;
+    var tot=poDraft.lines.reduce(function(a,l){ var it=itemById(l.itemId); return a + (Number(l.qty)||0)*(it?Number(it.cost||0):0); },0);
+    tb.innerHTML = "<span class='muted'>ยอดเงินโดยประมาณ (ตามต้นทุนปัจจุบัน)</span> <strong class='baht' style='font-size:16px; color:var(--accent)'>"+money(tot)+"</strong>";
+  }
+  function savePO(){
+    var iso=$("#poDate").value; if(!iso){ shake("#poDate"); return false; }
+    var sup=$("#poSupplier").value; if(!sup){ toast("กรุณาเลือกซัพพลายเออร์"); shake("#poSupplier"); return false; }
+    var valid=poDraft.lines.filter(function(l){ return l.itemId && Number(l.qty)>0; });
+    if(valid.length===0){ toast("กรุณาเพิ่มรายการอย่างน้อย 1 รายการ"); return false; }
+    var p=iso.split("-"); var be=(parseInt(p[0],10)+543)+"-"+p[1]+"-"+p[2];
+    var po={ id:uid("p"), no:nextDocNo("PO",be), date:be, supplierId:sup, note:$("#poNote").value.trim(),
+      terms:($("#poTerms")?$("#poTerms").value.trim():"")||"30 วัน", delivery:($("#poDelivery")?$("#poDelivery").value.trim():""),
+      lines: valid.map(function(l){ return { itemId:l.itemId, qty:Number(l.qty) }; }) };
+    userTouched(); putRec("pos", po); renderPO(); toast("สร้างใบสั่งซื้อ "+po.no+" แล้ว");
+  }
+
+  /* ---- Thai baht in words + printable PO document ---- */
+  function bahtReadGroup(s){
+    var dg=["","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"];
+    var ps=["","สิบ","ร้อย","พัน","หมื่น","แสน"];
+    var r="", len=s.length;
+    for(var i=0;i<len;i++){
+      var d=parseInt(s.charAt(i),10), pos=len-1-i;
+      if(d===0) continue;
+      if(pos===0 && d===1 && len>1) r+="เอ็ด";
+      else if(pos===1 && d===1) r+="สิบ";
+      else if(pos===1 && d===2) r+="ยี่สิบ";
+      else r+=dg[d]+ps[pos];
+    }
+    return r;
+  }
+  function readInt(num){
+    if(num===0) return "";
+    var s=String(num), groups=[];
+    while(s.length>6){ groups.unshift(s.slice(-6)); s=s.slice(0,-6); }
+    groups.unshift(s);
+    var txt="";
+    for(var g=0; g<groups.length; g++){
+      var part=bahtReadGroup(groups[g]);
+      if(part) txt+=part;
+      if(g<groups.length-1) txt+="ล้าน";
+    }
+    return txt;
+  }
+  function bahtText(amount){
+    var v=Math.round(Number(amount||0)*100)/100;
+    var baht=Math.floor(v), satang=Math.round((v-baht)*100);
+    if(baht===0 && satang===0) return "ศูนย์บาทถ้วน";
+    var t="";
+    if(baht>0) t+=readInt(baht)+"บาท";
+    t += satang>0 ? readInt(satang)+"สตางค์" : "ถ้วน";
+    return t;
+  }
+  function fmt2(n){ return Number(n||0).toLocaleString("en-US",{minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+  function poContext(po){
+    var c = store.company || DEFAULT_COMPANY;
+    var s = supById(po.supplierId) || {};
+    var items=[], subtotal=0;
+    po.lines.forEach(function(l,i){
+      var it=itemById(l.itemId); var price=Number(it?it.cost||0:0), amt=Number(l.qty)*price; subtotal+=amt;
+      items.push({ no:i+1, name:it?it.name:"(ลบแล้ว)", code:(it&&it.code)?("("+it.code+")"):"", qty:nfmt(l.qty), unit:it?it.unit:"", price:fmt2(price), amount:fmt2(amt) });
+    });
+    var vat=Math.round(subtotal*0.07*100)/100, grand=Math.round((subtotal+vat)*100)/100;
+    var logo = c.logoImg ? "<img src='"+c.logoImg+"' alt='logo' style='max-height:66px; max-width:190px; object-fit:contain'>"
+                         : (c.logo?"<span class='lg'>"+esc(c.logo)+"</span>":"");
+    return {
+      raw:{ logo:logo },
+      scalars:{
+        "company.nameTh":c.nameTh||"", "company.nameEn":c.nameEn||"", "company.address":c.address||"",
+        "company.phone":c.phone||"", "company.fax":c.fax||"", "company.email":c.email||"", "company.taxId":c.taxId||"",
+        "supplier.name":s.name||"", "supplier.address":s.address||"", "supplier.phone":s.phone||"", "supplier.contact":s.contact||"",
+        "po.no":po.no||"", "po.date":fmtDate(po.date), "po.terms":po.terms||"30 วัน", "po.delivery":po.delivery||"", "po.note":po.note||"",
+        "subtotal":fmt2(subtotal), "vat":fmt2(vat), "grand":fmt2(grand), "bahtText":bahtText(grand)
+      },
+      items:items
+    };
+  }
+  function renderPoTemplate(tpl, ctx){
+    var out = String(tpl||"").replace(/\{\{#items\}\}([\s\S]*?)\{\{\/items\}\}/g, function(_, inner){
+      return ctx.items.map(function(row){
+        return inner.replace(/\{\{\s*([\w.]+)\s*\}\}/g, function(m, key){ return (row[key]!=null)?esc(String(row[key])):""; });
+      }).join("");
+    });
+    out = out.replace(/\{\{\s*([\w.]+)\s*\}\}/g, function(m, key){
+      if(ctx.raw[key]!=null) return ctx.raw[key];
+      if(ctx.scalars[key]!=null) return esc(String(ctx.scalars[key]));
+      return "";
+    });
+    return out;
+  }
+  function poSheetHtml(po){ return renderPoTemplate(store.poTemplate || DEFAULT_PO_TEMPLATE, poContext(po)); }
+
+  function openPrintPO(po){
+    var root=$("#printRoot");
+    root.innerHTML =
+      "<div class='print-toolbar'>"
+        +"<button class='btn primary' id='pt_print'>🖨 พิมพ์ / บันทึกเป็น PDF</button>"
+        +"<button class='btn' id='pt_close'>ปิด</button>"
+        +"<span class='muted' style='font-size:12px'>ในหน้าต่างพิมพ์ เลือกปลายทาง “บันทึกเป็น PDF” เพื่อได้ไฟล์</span>"
+      +"</div>"
+      +"<div class='po-sheet'>"+poSheetHtml(po)+"</div>";
+    root.hidden=false; document.body.style.overflow="hidden";
+    $("#pt_close").onclick=function(){ root.hidden=true; root.innerHTML=""; document.body.style.overflow=""; };
+    $("#pt_print").onclick=function(){
+      document.body.classList.add("po-printing");
+      var done=function(){ document.body.classList.remove("po-printing"); window.removeEventListener("afterprint", done); };
+      window.addEventListener("afterprint", done);
+      window.print(); setTimeout(done, 1500);
+    };
+  }
+
+  function samplePOForPreview(){
+    if(store.pos && store.pos.length) return store.pos[0];
+    return { no:"PO69090001", date:"2569-09-01", supplierId:(store.suppliers[0]&&store.suppliers[0].id)||"",
+      terms:"30 วัน", delivery:"", note:"", lines: store.items.slice(0,3).map(function(it){ return { itemId:it.id, qty:10 }; }) };
+  }
+  function openPoDesigner(){
+    var root=$("#designRoot");
+    root.innerHTML =
+      "<div class='dz-bar'>"
+        +"<h3>ออกแบบใบสั่งซื้อ</h3>"
+        +"<span class='muted' style='font-size:12px'>แก้เทมเพลตด้านซ้าย ดูผลด้านขวาแบบสด</span>"
+        +"<span class='sp'></span>"
+        +"<button class='btn sm' id='dz_reset'>คืนค่าเริ่มต้น</button>"
+        +"<button class='btn sm' id='dz_close'>ปิด</button>"
+        +"<button class='btn primary sm' id='dz_save'>บันทึก</button>"
+      +"</div>"
+      +"<div class='dz-body'>"
+        +"<div class='dz-edit'>"
+          +"<textarea id='dz_tpl' spellcheck='false'></textarea>"
+          +"<div class='dz-help'>"
+            +"<b>ช่องข้อมูลที่ใช้ได้</b> (พิมพ์ในเทมเพลตแล้วระบบแทนค่าให้): "
+            +"<code>{{company.nameTh}}</code> <code>{{company.nameEn}}</code> <code>{{company.address}}</code> <code>{{company.phone}}</code> <code>{{company.fax}}</code> <code>{{company.email}}</code> <code>{{company.taxId}}</code> <code>{{logo}}</code> "
+            +"<code>{{supplier.name}}</code> <code>{{supplier.address}}</code> <code>{{supplier.phone}}</code> <code>{{supplier.contact}}</code> "
+            +"<code>{{po.no}}</code> <code>{{po.date}}</code> <code>{{po.terms}}</code> <code>{{po.delivery}}</code> <code>{{po.note}}</code> "
+            +"<code>{{subtotal}}</code> <code>{{vat}}</code> <code>{{grand}}</code> <code>{{bahtText}}</code><br>"
+            +"<b>รายการสินค้า</b> วางระหว่าง <code>{{#items}}</code> … <code>{{/items}}</code> ใช้: <code>{{no}}</code> <code>{{name}}</code> <code>{{code}}</code> <code>{{qty}}</code> <code>{{unit}}</code> <code>{{price}}</code> <code>{{amount}}</code> · แต่งสี/ฟอนต์/เส้นได้ด้วย <code>&lt;style&gt;…&lt;/style&gt;</code> บนสุดของเทมเพลต · ใส่โลโก้รูปที่เมนู “ข้อมูลบริษัท”"
+          +"</div>"
+        +"</div>"
+        +"<div class='dz-prev'><div class='po-sheet' id='dz_prev'></div></div>"
+      +"</div>";
+    var ta=$("#dz_tpl"); ta.value = store.poTemplate || DEFAULT_PO_TEMPLATE;
+    var sample=samplePOForPreview();
+    function preview(){ try{ $("#dz_prev").innerHTML = renderPoTemplate(ta.value, poContext(sample)); }catch(e){ $("#dz_prev").innerHTML="<div style='padding:20px;color:#c00'>เทมเพลตมีข้อผิดพลาด</div>"; } }
+    var pvT; ta.addEventListener("input", function(){ clearTimeout(pvT); pvT=setTimeout(preview, 200); });
+    preview();
+    root.hidden=false; document.body.style.overflow="hidden";
+    function closeDz(){ root.hidden=true; root.innerHTML=""; document.body.style.overflow=""; }
+    $("#dz_close").onclick=closeDz;
+    $("#dz_reset").onclick=function(){ ta.value=DEFAULT_PO_TEMPLATE; preview(); };
+    $("#dz_save").onclick=function(){ setPoTemplate(ta.value); toast("บันทึกเทมเพลตใบสั่งซื้อแล้ว"); closeDz(); };
+  }
+
+  function poDetailModal(po){
+    var rec=poReceived(po.id);
+    var lineRows = po.lines.map(function(l){
+      var it=itemById(l.itemId); var got=rec[l.itemId]||0; var rem=Math.max(0,Number(l.qty)-got);
+      var amt=Number(l.qty)*Number(it?it.cost||0:0);
+      return "<tr><td>"+esc(it?it.name:"(ถูกลบ)")+"</td>"
+        +"<td class='center muted'>"+esc(it?it.unit:"")+"</td>"
+        +"<td class='right num'>"+nfmt(l.qty)+"</td>"
+        +"<td class='right num' style='color:var(--pu)'>"+nfmt(got)+"</td>"
+        +"<td class='right num "+(rem>0?"":"muted")+"'>"+nfmt(rem)+"</td>"
+        +"<td class='right baht'>"+money(amt)+"</td></tr>";
+    }).join("");
+    var linkedPU = store.docs.filter(function(d){ return d.type==="PU" && d.poId===po.id; })
+      .sort(function(a,b){return a.no<b.no?-1:1;});
+    var puHtml = linkedPU.length
+      ? linkedPU.map(function(d){ return "<span class='doc-no' style='color:var(--pu)'>"+esc(d.no)+"</span> <span class='muted' style='font-size:12px'>("+fmtDate(d.date)+")</span>"; }).join("<br>")
+      : "<span class='muted'>ยังไม่มีใบรับ</span>";
+    var s=supById(po.supplierId), st=poStatus(po);
+    var linkedAssets = (store.assets||[]).filter(function(x){ return x.poId===po.id; });
+    var assetHtml = linkedAssets.length
+      ? linkedAssets.map(function(x){ return "<span class='mono' style='color:var(--po)'>"+esc(x.code||"-")+"</span> "+esc(x.name)+" <a href='#' data-openasset='"+x.id+"' style='font-size:12px'>(ดู)</a>"; }).join("<br>")
+      : "<span class='muted'>ยังไม่มี</span>";
+    var body=
+      "<div style='display:flex; align-items:center; gap:12px'>"+poStatusPill(po)
+        +"<span class='doc-no' style='font-size:20px; color:var(--po)'>"+esc(po.no)+"</span></div>"
+      +"<dl class='kv'>"
+        +"<dt>ซัพพลายเออร์</dt><dd>"+esc(s?s.name:"-")+"</dd>"
+        +"<dt>วันที่สั่ง</dt><dd>"+fmtDate(po.date)+"</dd>"
+        +(po.note?"<dt>หมายเหตุ</dt><dd>"+esc(po.note)+"</dd>":"")
+        +"<dt>ใบรับที่อ้างอิง</dt><dd>"+puHtml+"</dd>"
+        +"<dt>ทรัพย์สินที่ลงทะเบียน</dt><dd>"+assetHtml+"</dd>"
+      +"</dl>"
+      +"<div class='twrap' style='border:1px solid var(--line); border-radius:10px; overflow:hidden'>"
+        +"<table><thead><tr><th>วัสดุ</th><th class='center'>หน่วย</th><th class='right'>สั่ง</th><th class='right'>รับแล้ว</th><th class='right'>ค้างรับ</th><th class='right'>ยอดเงิน</th></tr></thead>"
+        +"<tbody>"+lineRows+"</tbody>"
+        +"<tfoot><tr><td colspan='5' class='right muted'>รวมยอดเงิน (ประมาณ ตามต้นทุนปัจจุบัน)</td><td class='right baht'><strong>"+money(poAmount(po))+"</strong></td></tr></tfoot>"
+        +"</table></div>";
+    var actions=[];
+    actions.push({label:"🖨 พิมพ์ใบสั่งซื้อ", cls:"primary", fn:function(){ closeModal(); openPrintPO(po); return false; }});
+    if(st!=="complete") actions.push({label:"รับของ (สร้างใบรับ PU)", fn:function(){ receiveFromPO(po.id); }});
+    actions.push({label:"รับเป็นทรัพย์สิน", fn:function(){ registerAssetFromPO(po); return false; }});
+    actions.push({label:"ลบใบสั่งซื้อ", cls:"danger-btn", fn:function(){
+      confirmModal("ลบใบสั่งซื้อ "+po.no+" ?", function(){
+        userTouched(); delRec("pos", po.id); renderPO(); toast("ลบใบสั่งซื้อแล้ว");
+      }, {title:"ลบใบสั่งซื้อ", ok:"ลบ", danger:true});
+      return false;
+    }});
+    actions.push({label:"ปิด"});
+    openModal("รายละเอียดใบสั่งซื้อ", body, actions);
+  }
+
+  // jump to PU form pre-linked to a PO
+  function receiveFromPO(poId){
+    closeModal();
+    txState = { type:"PU", lines:[], poId:"" };
+    showView("tx");
+    $$("#typeSeg .opt").forEach(function(o){ o.classList.toggle("active", o.dataset.t==="PU"); });
+    renderParty(); renderPoRef(); updatePoRefVisibility();
+    var sel=$("#txPoRef"); if(sel){ sel.value=poId; applyPoRef(poId); }
+  }
+
+  // register an asset received against this PO (supplier/date/PO prefilled)
+  function registerAssetFromPO(po){
+    closeModal();
+    assetModal({ source:"po", poId:po.id, poNo:po.no, supplierId:po.supplierId||"", purchaseDate:po.date });
+  }
+
+  $("#poTable").addEventListener("click", function(e){
+    var t;
+    if((t=e.target.closest("[data-receive]"))){ e.stopPropagation(); receiveFromPO(t.dataset.receive); return; }
+    if((t=e.target.closest("[data-printpo]"))){ e.stopPropagation(); var pp=poById(t.dataset.printpo); if(pp) openPrintPO(pp); return; }
+    if((t=e.target.closest("[data-po]"))){ var po=poById(t.dataset.po); if(po) poDetailModal(po); }
+  });
+
+  // delegated line editing for PO modal
+  $("#modalBody").addEventListener("click", function(e){
+    if(e.target.closest("#poAddLine")){ poDraft.lines.push({itemId:"",qty:""}); renderPoLines(); }
+    else if(e.target.closest(".po-rm")){
+      var row=e.target.closest(".line-row"); var i=+row.dataset.i;
+      poDraft.lines.splice(i,1); if(poDraft.lines.length===0) poDraft.lines.push({itemId:"",qty:""});
+      renderPoLines();
+    }
+  });
+  $("#modalBody").addEventListener("input", function(e){
+    var row=e.target.closest(".line-row");
+    if(row){ var i=+row.dataset.i;
+      if(e.target.classList.contains("po-item")){ poDraft.lines[i].itemId=e.target.value; updatePoTotal(); }
+      if(e.target.classList.contains("po-qty")){ poDraft.lines[i].qty=e.target.value; updatePoTotal(); }
+    }
+    if(e.target.id==="poDate") refreshPoNo();
+  });
+
+  /* ---------------- transaction form ---------------- */
+  var txState = { type:"PU", lines:[], poId:"" };
+
+  function ensureTxForm(){
+    if(!$("#txDate").value) $("#txDate").value = todayISO();
+    if(txState.lines.length===0) addLine();
+    renderParty();
+    updatePoRefVisibility();
+    renderLines();
+    updateDocNo();
+  }
+
+  // segmented type
+  $("#typeSeg").addEventListener("click", function(e){
+    var b=e.target.closest(".opt"); if(!b) return;
+    txState.type=b.dataset.t;
+    $$("#typeSeg .opt").forEach(function(o){ o.classList.toggle("active", o===b); });
+    renderParty(); updatePoRefVisibility(); updateDocNo();
+  });
+
+  function updatePoRefVisibility(){
+    var f=$("#poRefField");
+    if(txState.type==="PU"){ f.hidden=false; renderPoRef(); }
+    else { f.hidden=true; txState.poId=""; }
+  }
+  function renderPoRef(){
+    var sel=$("#txPoRef"); if(!sel) return;
+    var open=(store.pos||[]).filter(function(p){ return poStatus(p)!=="complete"; })
+      .sort(function(a,b){ return b.no<a.no?-1:1; });
+    var cur=txState.poId||"";
+    sel.innerHTML = "<option value=''>— ไม่อ้างอิง (รับเข้าโดยตรง) —</option>"
+      + open.map(function(p){ var s=supById(p.supplierId);
+          return "<option value='"+p.id+"'"+(p.id===cur?" selected":"")+">"+esc(p.no)+" · "+esc(s?s.name:"")+"</option>"; }).join("");
+  }
+  function applyPoRef(poId){
+    txState.poId = poId||"";
+    if(!poId) return;
+    var po=poById(poId); if(!po) return;
+    var partyEl=$("#txParty"); if(partyEl && partyEl.tagName==="SELECT") partyEl.value=po.supplierId;
+    var rem=poRemaining(po);
+    txState.lines = rem.length ? rem.map(function(l){ return { itemId:l.itemId, qty:l.qty }; }) : [{itemId:"",qty:""}];
+    renderLines();
+    toast("ดึงรายการค้างรับจาก "+po.no+" แล้ว");
+  }
+  $("#txPoRef").addEventListener("change", function(e){ applyPoRef(e.target.value); });
+
+  $("#txDate").addEventListener("change", updateDocNo);
+
+  function updateDocNo(){
+    var iso=$("#txDate").value;
+    var be = iso ? (parseInt(iso.split("-")[0],10)+543)+"-"+iso.split("-")[1]+"-"+iso.split("-")[2] : "";
+    var no = nextDocNo(txState.type, be);
+    var pv=$("#docNoPreview"); pv.textContent=no;
+    pv.style.color = "var(--"+txState.type.toLowerCase()+")";
+  }
+
+  function renderParty(){
+    var f=$("#partyField");
+    if(txState.type==="PU"){
+      var opts = store.suppliers.map(function(s){ return "<option value='"+s.id+"'>"+esc(s.name)+"</option>"; }).join("");
+      f.innerHTML = "<label>ซัพพลายเออร์<span class='req'>*</span> <span class='hint'>— เลือกผู้ขาย</span></label>"
+        +"<select id='txParty'>"+(opts||"<option value=''>— ยังไม่มีซัพพลายเออร์ —</option>")+"</select>";
+    } else if(txState.type==="RC"){
+      f.innerHTML = "<label>รับคืนจาก <span class='hint'>— แผนก/ผู้คืน</span></label>"
+        +"<input type='text' id='txParty' placeholder='เช่น ฝ่ายบัญชี'>";
+    } else {
+      f.innerHTML = "<label>เบิกโดย / แผนก<span class='req'>*</span></label>"
+        +"<input type='text' id='txParty' placeholder='เช่น ฝ่ายผลิต'>";
+    }
+  }
+
+  function itemOptions(sel){
+    return "<option value=''>— เลือกวัสดุ —</option>"+store.items.map(function(it){
+      return "<option value='"+it.id+"'"+(it.id===sel?" selected":"")+">"+esc(it.name)+" ("+esc(it.unit)+")</option>";
+    }).join("");
+  }
+
+  function addLine(itemId, qty){ txState.lines.push({ itemId:itemId||"", qty:qty||"" }); }
+
+  function renderLines(){
+    var wrap=$("#lineRows");
+    wrap.innerHTML = txState.lines.map(function(l,i){
+      return "<div class='line-row' data-i='"+i+"'>"
+        +"<select class='ln-item'>"+itemOptions(l.itemId)+"</select>"
+        +"<input type='number' class='ln-qty' min='1' placeholder='0' value='"+(l.qty||"")+"'>"
+        +"<button type='button' class='rm' title='ลบบรรทัด'>✕</button>"
+        +"</div>";
+    }).join("");
+    renderTxSummary();
+  }
+
+  $("#lineRows").addEventListener("input", function(e){
+    var row=e.target.closest(".line-row"); if(!row) return;
+    var i=+row.dataset.i;
+    if(e.target.classList.contains("ln-item")) txState.lines[i].itemId=e.target.value;
+    if(e.target.classList.contains("ln-qty")) txState.lines[i].qty=e.target.value;
+    renderTxSummary();
+  });
+  $("#lineRows").addEventListener("click", function(e){
+    if(e.target.classList.contains("rm")){
+      var row=e.target.closest(".line-row"); var i=+row.dataset.i;
+      txState.lines.splice(i,1);
+      if(txState.lines.length===0) addLine();
+      renderLines();
+    }
+  });
+  $("#addLineBtn").addEventListener("click", function(){ addLine(); renderLines(); });
+
+  function renderTxSummary(){
+    var valid = txState.lines.filter(function(l){ return l.itemId && Number(l.qty)>0; });
+    var box=$("#txSummary");
+    if(valid.length===0){ box.className="muted"; box.style.fontSize="13.5px";
+      box.innerHTML="ยังไม่ได้เลือกวัสดุ"; return; }
+    var sign = txState.type==="PD" ? "−" : "+";
+    var cls = txState.type==="PD" ? "qty-out" : "qty-in";
+    box.className=""; box.style.fontSize="14px";
+    box.innerHTML = valid.map(function(l){
+      var it=itemById(l.itemId);
+      return "<div style='display:flex; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px solid var(--line)'>"
+        +"<span>"+esc(it?it.name:"?")+"</span>"
+        +"<span class='"+cls+" num'>"+sign+nfmt(l.qty)+" "+esc(it?it.unit:"")+"</span></div>";
+    }).join("")
+    +"<div style='display:flex; justify-content:space-between; padding-top:10px; font-weight:600'>"
+    +"<span>รวม</span><span class='num'>"+valid.length+" รายการ</span></div>";
+  }
+
+  $("#addLineBtn"); // noop keep
+  $("#txResetBtn").addEventListener("click", function(){
+    txState={type:txState.type, lines:[], poId:""}; addLine();
+    $("#txDate").value=todayISO(); $("#txNote").value="";
+    renderParty(); updatePoRefVisibility(); renderLines(); updateDocNo();
+  });
+
+  $("#txSaveBtn").addEventListener("click", function(){
+    var iso=$("#txDate").value;
+    if(!iso){ shake("#txDate"); return; }
+    var partyEl=$("#txParty");
+    var valid = txState.lines.filter(function(l){ return l.itemId && Number(l.qty)>0; });
+    if(valid.length===0){ toast("กรุณาเลือกวัสดุอย่างน้อย 1 รายการ"); return; }
+    if(txState.type==="PU" && (!partyEl || !partyEl.value)){ toast("กรุณาเลือกซัพพลายเออร์"); shake("#txParty"); return; }
+    if(txState.type==="PD" && (!partyEl || !partyEl.value.trim())){ toast("กรุณาระบุผู้เบิก/แผนก"); shake("#txParty"); return; }
+
+    // stock note for issue (allow, but flag if it drives a balance negative)
+    var over = (txState.type==="PD") ? valid.filter(function(l){ return Number(l.qty) > balance(l.itemId); }) : [];
+
+    var p=iso.split("-"); var be=(parseInt(p[0],10)+543)+"-"+p[1]+"-"+p[2];
+    var doc={
+      id:uid("d"), no:nextDocNo(txState.type, be), type:txState.type, date:be,
+      supplierId: txState.type==="PU" ? partyEl.value : "",
+      party: txState.type==="PU" ? "" : (partyEl?partyEl.value.trim():""),
+      poId: txState.type==="PU" ? (txState.poId||"") : "",
+      note:$("#txNote").value.trim(),
+      lines: valid.map(function(l){ return { itemId:l.itemId, qty:Number(l.qty) }; })
+    };
+    userTouched(); putRec("docs", doc);
+    toast("บันทึกเอกสาร "+doc.no+" แล้ว"+(over.length?" — บางรายการสต็อกติดลบ":""));
+    txState={type:txState.type, lines:[], poId:""}; addLine();
+    $("#txNote").value=""; if(partyEl && partyEl.tagName==="INPUT") partyEl.value="";
+    updatePoRefVisibility(); renderLines(); updateDocNo();
+    docDetailModal(doc);
+  });
+
+  /* ---------------- history ---------------- */
+  var histF="ALL", histQ="";
+  $("#histFilter").addEventListener("click", function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    histF=b.dataset.f;
+    $$("#histFilter button").forEach(function(x){ x.classList.toggle("active", x===b); });
+    renderHist();
+  });
+  $("#histSearch").addEventListener("input", function(e){ histQ=e.target.value.trim().toLowerCase(); renderHist(); });
+
+  function docParty(doc){
+    if(doc.type==="PU"){ var s=supById(doc.supplierId); return s?s.name:"-"; }
+    return doc.party||"-";
+  }
+
+  function renderHist(){
+    var list = store.docs.slice().sort(function(a,b){ return b.no<a.no?-1:1; });
+    if(histF!=="ALL") list=list.filter(function(d){ return d.type===histF; });
+    if(histQ){
+      list=list.filter(function(d){
+        if(d.no.toLowerCase().indexOf(histQ)>=0) return true;
+        if(docParty(d).toLowerCase().indexOf(histQ)>=0) return true;
+        return d.lines.some(function(l){ var it=itemById(l.itemId); return it && it.name.toLowerCase().indexOf(histQ)>=0; });
+      });
+    }
+    var rows=list.map(function(doc){
+      var qty=doc.lines.reduce(function(a,l){return a+Number(l.qty);},0);
+      var r=[
+        "<span class='doc-no' style='color:var(--"+doc.type.toLowerCase()+")'>"+esc(doc.no)+"</span>",
+        {h:pill(doc.type)},
+        {c:"muted", h:fmtDate(doc.date)},
+        esc(docParty(doc)),
+        {c:"num muted", h:doc.lines.length+" รายการ"},
+        {c:"right num", h:(doc.type==="PD"?"<span class='qty-out'>−":"<span class='qty-in'>+")+nfmt(qty)+"</span>"}
+      ];
+      r._attr="data-doc='"+doc.id+"' style='cursor:pointer'";
+      return r;
+    });
+    $("#histTable").innerHTML = tbl(
+      ["เลขที่เอกสาร","ประเภท","วันที่","คู่ค้า / ผู้เบิก",{c:"num",h:"รายการ"},{c:"right",h:"รวมจำนวน"}],
+      rows, {empty:"ไม่พบเอกสารตามเงื่อนไข"}
+    );
+  }
+  $("#histTable").addEventListener("click", function(e){
+    var tr=e.target.closest("[data-doc]"); if(!tr) return;
+    var doc=store.docs.find(function(d){return d.id===tr.dataset.doc;});
+    if(doc) docDetailModal(doc);
+  });
+
+  function docDetailModal(doc){
+    var lineRows = doc.lines.map(function(l){
+      var it=itemById(l.itemId);
+      return "<tr><td>"+esc(it?it.name:"(ถูกลบ)")+"</td>"
+        +"<td class='center muted'>"+esc(it?it.unit:"")+"</td>"
+        +"<td class='right "+(doc.type==="PD"?"qty-out":"qty-in")+" num'>"+(doc.type==="PD"?"−":"+")+nfmt(l.qty)+"</td></tr>";
+    }).join("");
+    var body=
+      "<div style='display:flex; align-items:center; gap:12px; margin-bottom:4px'>"
+        +pill(doc.type)
+        +"<span class='doc-no' style='font-size:20px; color:var(--"+doc.type.toLowerCase()+")'>"+esc(doc.no)+"</span></div>"
+      +"<dl class='kv'>"
+        +"<dt>วันที่</dt><dd>"+fmtDate(doc.date)+"</dd>"
+        +"<dt>"+(doc.type==="PU"?"ซัพพลายเออร์":doc.type==="RC"?"รับคืนจาก":"เบิกโดย")+"</dt><dd>"+esc(docParty(doc))+"</dd>"
+        +(doc.poId && poById(doc.poId) ? "<dt>อ้างอิง PO</dt><dd><span class='doc-no' style='color:var(--po)'>"+esc(poById(doc.poId).no)+"</span></dd>" : "")
+        +(doc.note?"<dt>หมายเหตุ</dt><dd>"+esc(doc.note)+"</dd>":"")
+      +"</dl>"
+      +"<div class='twrap' style='border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-top:6px'>"
+        +"<table><thead><tr><th>วัสดุ</th><th class='center'>หน่วย</th><th class='right'>จำนวน</th></tr></thead>"
+        +"<tbody>"+lineRows+"</tbody></table></div>";
+    openModal("รายละเอียดเอกสาร", body, [
+      {label:"ลบเอกสาร", cls:"danger-btn", fn:function(){
+        confirmModal("ลบเอกสาร "+doc.no+" ?\nยอดคงเหลือจะถูกคำนวณใหม่", function(){
+          userTouched(); delRec("docs", doc.id);
+          renderHist(); renderDash(); toast("ลบเอกสารแล้ว");
+        }, {title:"ลบเอกสาร", ok:"ลบ", danger:true});
+        return false;
+      }},
+      {label:"ปิด", cls:"primary"}
+    ]);
+  }
+
+  /* ---------------- report + Excel export ---------------- */
+  var repSel = {};   // itemId -> false when unchecked (default = selected)
+  function firstOfMonthISO(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-01"; }
+  function ensureReport(){
+    if(!$("#repStart").value) $("#repStart").value=firstOfMonthISO();
+    if(!$("#repEnd").value) $("#repEnd").value=todayISO();
+    renderRepPicker(); renderReport();
+  }
+  function repSelectedItems(){
+    var cat=$("#repCat").value;
+    return store.items.filter(function(it){ return (cat==="ALL"||(it.cat||"")===cat) && repSel[it.id]!==false; });
+  }
+  function renderRepPicker(){
+    var q=($("#repSearch").value||"").trim().toLowerCase(), cat=$("#repCat").value;
+    var items=store.items.filter(function(it){ if(cat!=="ALL" && (it.cat||"")!==cat) return false; if(q && (it.name+" "+it.code).toLowerCase().indexOf(q)<0) return false; return true; });
+    $("#repItems").innerHTML = items.length ? items.map(function(it){
+      var on=repSel[it.id]!==false;
+      return "<label style='display:flex; align-items:center; gap:7px; padding:4px 2px; font-size:13px; break-inside:avoid'><input type='checkbox' data-repitem='"+it.id+"' "+(on?"checked":"")+"><span class='mono muted' style='font-size:10.5px'>"+esc(it.code)+"</span> "+esc(it.name)+"</label>";
+    }).join("") : "<div class='muted' style='padding:8px'>ไม่พบวัสดุ</div>";
+  }
+  function computeReport(items, startISO, endISO){
+    var start = startISO? new Date(startISO+"T00:00:00") : null;
+    var end = endISO? new Date(endISO+"T23:59:59") : null;
+    return items.map(function(it){
+      var opening=0,pu=0,rc=0,pd=0;
+      store.docs.forEach(function(d){
+        var dt=beToDate(d.date); if(!dt) return;
+        var before = start && dt < start;
+        var inR = (!start||dt>=start) && (!end||dt<=end);
+        if(!before && !inR) return;
+        d.lines.forEach(function(l){ if(l.itemId!==it.id) return; var qn=Number(l.qty);
+          if(before){ opening += (d.type==="PD"? -qn : qn); }
+          else { if(d.type==="PU") pu+=qn; else if(d.type==="RC") rc+=qn; else if(d.type==="PD") pd+=qn; }
+        });
+      });
+      return { it:it, opening:opening, pu:pu, rc:rc, pd:pd, closing: opening+pu+rc-pd };
+    });
+  }
+  function renderReport(){
+    var items=repSelectedItems();
+    var data=computeReport(items, $("#repStart").value, $("#repEnd").value);
+    var inVal=0, outVal=0;
+    data.forEach(function(r){ var c=Number(r.it.cost||0); inVal+=(r.pu+r.rc)*c; outVal+=r.pd*c; });
+    $("#repStats").innerHTML=[
+      {label:"มูลค่ารับเข้า", display:money(inVal), foot:"PU + RC ในช่วง"},
+      {label:"มูลค่าเบิกออก", display:money(outVal), foot:"PD ในช่วง"},
+      {label:"วัสดุในรายงาน", value:items.length, foot:"รายการที่เลือก"}
+    ].map(statHtml).join("");
+    var rows=data.map(function(r){
+      return [
+        "<span class='mono muted'>"+esc(r.it.code)+"</span>",
+        "<strong>"+esc(r.it.name)+"</strong>",
+        {c:"center muted", h:esc(r.it.unit)},
+        {c:"right num muted", h:nfmt(r.opening)},
+        {c:"right num", h:r.pu?"<span class='qty-in'>+"+nfmt(r.pu)+"</span>":"<span class='muted'>0</span>"},
+        {c:"right num", h:r.rc?"<span class='qty-in'>+"+nfmt(r.rc)+"</span>":"<span class='muted'>0</span>"},
+        {c:"right num", h:r.pd?"<span class='qty-out'>−"+nfmt(r.pd)+"</span>":"<span class='muted'>0</span>"},
+        {c:"right num", h:"<strong>"+nfmt(r.closing)+"</strong>"}
+      ];
+    });
+    $("#repTable").innerHTML = tbl(
+      ["รหัส","ชื่อวัสดุ",{c:"center",h:"หน่วย"},{c:"right",h:"ยกมา"},{c:"right",h:"รับเข้า"},{c:"right",h:"รับคืน"},{c:"right",h:"เบิกจ่าย"},{c:"right",h:"คงเหลือ"}],
+      rows, {empty:"เลือกวัสดุอย่างน้อย 1 รายการ"}
+    );
+  }
+  function repSetPreset(p){
+    var d=new Date(), y=d.getFullYear(), m=d.getMonth(), s, e;
+    if(p==="thismonth"){ s=new Date(y,m,1); e=d; }
+    else if(p==="lastmonth"){ s=new Date(y,m-1,1); e=new Date(y,m,0); }
+    else if(p==="thisyear"){ s=new Date(y,0,1); e=d; }
+    else { s=new Date(d.getTime()-90*86400000); e=d; }
+    function iso(x){ return x.getFullYear()+"-"+pad(x.getMonth()+1)+"-"+pad(x.getDate()); }
+    $("#repStart").value=iso(s); $("#repEnd").value=iso(e);
+  }
+  $("#repPreset").addEventListener("click", function(ev){ var b=ev.target.closest("button"); if(!b) return; $$("#repPreset button").forEach(function(x){x.classList.toggle("active",x===b);}); repSetPreset(b.dataset.p); renderReport(); });
+  $("#repCat").addEventListener("change", function(){ renderRepPicker(); renderReport(); });
+  $("#repSearch").addEventListener("input", renderRepPicker);
+  $("#repItems").addEventListener("change", function(ev){ var c=ev.target.closest("[data-repitem]"); if(!c) return; repSel[c.dataset.repitem]=c.checked; renderReport(); });
+  $("#repAll").addEventListener("click", function(){ $$("#repItems [data-repitem]").forEach(function(c){ repSel[c.dataset.repitem]=true; }); renderRepPicker(); renderReport(); });
+  $("#repNone").addEventListener("click", function(){ $$("#repItems [data-repitem]").forEach(function(c){ repSel[c.dataset.repitem]=false; }); renderRepPicker(); renderReport(); });
+  $("#repStart").addEventListener("change", renderReport);
+  $("#repEnd").addEventListener("change", renderReport);
+  $("#repRun").addEventListener("click", renderReport);
+  $("#repXlsx").addEventListener("click", exportReportXlsx);
+
+  function exportReportXlsx(){
+    if(typeof XLSX==="undefined"){ toast("ตัวสร้าง Excel ยังโหลดไม่เสร็จ ลองอีกครั้งใน 2-3 วินาที"); return; }
+    var items=repSelectedItems();
+    if(items.length===0){ toast("เลือกวัสดุอย่างน้อย 1 รายการ"); return; }
+    var s=$("#repStart").value, e=$("#repEnd").value;
+    var data=computeReport(items, s, e);
+    var rangeTxt=(s?fmtDate(beFromGregISO(s)):"เริ่มต้น")+" ถึง "+(e?fmtDate(beFromGregISO(e)):"ล่าสุด");
+    var aoa=[["รายงานเคลื่อนไหวสต็อกวัสดุ"],["ช่วงวันที่", rangeTxt],["ออกรายงาน", fmtDate(todayBE())],[],
+      ["รหัส","ชื่อวัสดุ","หน่วย","ยอดยกมา","รับเข้า(PU)","รับคืน(RC)","เบิกจ่าย(PD)","คงเหลือ","ต้นทุน/หน่วย","มูลค่าคงเหลือ"]];
+    data.forEach(function(r){ var c=Number(r.it.cost||0); aoa.push([r.it.code, r.it.name, r.it.unit, r.opening, r.pu, r.rc, r.pd, r.closing, c, r.closing*c]); });
+    var ws=XLSX.utils.aoa_to_sheet(aoa);
+    ws["!cols"]=[{wch:12},{wch:34},{wch:8},{wch:10},{wch:11},{wch:11},{wch:12},{wch:10},{wch:11},{wch:14}];
+    var start = s? new Date(s+"T00:00:00"):null, end=e? new Date(e+"T23:59:59"):null;
+    var selIds={}; items.forEach(function(it){ selIds[it.id]=true; });
+    var d2=[["วันที่","เลขที่เอกสาร","ประเภท","รหัส","วัสดุ","จำนวน","ทิศทาง","คู่ค้า/ผู้เบิก"]];
+    store.docs.slice().sort(function(a,b){ return a.no<b.no?-1:1; }).forEach(function(dc){
+      var dt=beToDate(dc.date); if(!dt) return; if(start&&dt<start) return; if(end&&dt>end) return;
+      dc.lines.forEach(function(l){ if(!selIds[l.itemId]) return; var it=itemById(l.itemId);
+        d2.push([fmtDate(dc.date), dc.no, typeLabel(dc.type), it?it.code:"", it?it.name:"", Number(l.qty), (dc.type==="PD"?"เบิกออก":"รับเข้า"), docParty(dc)]);
+      });
+    });
+    var ws2=XLSX.utils.aoa_to_sheet(d2); ws2["!cols"]=[{wch:13},{wch:13},{wch:9},{wch:12},{wch:32},{wch:9},{wch:9},{wch:18}];
+    var wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "สรุปเคลื่อนไหว");
+    XLSX.utils.book_append_sheet(wb, ws2, "รายการเอกสาร");
+    try{ XLSX.writeFile(wb, "รายงานคลัง_"+(s||"")+"_"+(e||"")+".xlsx"); toast("ดาวน์โหลด Excel แล้ว"); }catch(err){ toast("ดาวน์โหลดไม่สำเร็จ"); }
+  }
+
+  /* ---------------- assets (ทะเบียนทรัพย์สิน) ---------------- */
+  function gregISOfromBE(be){ var p=(be||"").split("-"); if(p.length<3) return ""; return (parseInt(p[0],10)-543)+"-"+p[1]+"-"+p[2]; }
+  function beFromGregISO(iso){ var p=(iso||"").split("-"); if(p.length<3) return ""; return (parseInt(p[0],10)+543)+"-"+p[1]+"-"+p[2]; }
+
+  var assetF="ALL", assetQ="";
+  $("#assetFilter").addEventListener("click", function(e){ var b=e.target.closest("button"); if(!b) return; assetF=b.dataset.f; $$("#assetFilter button").forEach(function(x){ x.classList.toggle("active", x===b); }); renderAssets(); });
+  $("#assetSearch").addEventListener("input", function(e){ assetQ=e.target.value.trim().toLowerCase(); renderAssets(); });
+  $("#addAssetBtn").addEventListener("click", function(){ assetModal({source:"po"}); });
+  $("#addOpeningBtn").addEventListener("click", function(){ assetModal({source:"opening"}); });
+
+  function renderAssets(){
+    var all=store.assets||[];
+    var list=all.slice().sort(function(a,b){ return (b.purchaseDate||"")<(a.purchaseDate||"")?-1:1; });
+    if(assetF!=="ALL") list=list.filter(function(a){ return (a.status||"active")===assetF; });
+    if(assetQ) list=list.filter(function(a){ return (a.name+" "+a.code+" "+(a.location||"")).toLowerCase().indexOf(assetQ)>=0; });
+    var totalCost=all.reduce(function(s,a){return s+Number(a.cost||0);},0);
+    var totalBook=all.reduce(function(s,a){return s+bookValue(a);},0);
+    var repairN=all.filter(function(a){return (a.status||"active")==="repair";}).length;
+    $("#assetStats").innerHTML=[
+      {label:"ทรัพย์สินทั้งหมด", value:all.length, foot:"รายการ"},
+      {label:"มูลค่าซื้อรวม", display:money(totalCost), foot:"ราคาทุน"},
+      {label:"มูลค่าคงเหลือ", display:money(totalBook), foot:"หลังหักค่าเสื่อม"},
+      {label:"ซ่อมบำรุง", value:repairN, foot:"กำลังซ่อม", alert:repairN>0}
+    ].map(statHtml).join("");
+    var rows=list.map(function(a){
+      var st=ASSET_STATUS[a.status||"active"]||ASSET_STATUS.active;
+      return [
+        "<span class='mono muted'>"+esc(a.code||"-")+"</span>",
+        "<div><strong>"+esc(a.name)+"</strong><br><span class='chip-cat'><span class='dot' style='background:var(--po)'></span>"+esc(assetCatName(a.cat))+"</span></div>",
+        {c:"muted", h:a.purchaseDate?fmtDate(a.purchaseDate):"-"},
+        {c:"right baht", h:money(a.cost)},
+        {c:"right baht", h:money(bookValue(a))},
+        {c:"muted", h:esc(a.location||"-")},
+        {h:"<span class='pill "+st.cls+"'><span class='dot'></span>"+st.label+"</span>"},
+        {c:"right", h:"<button class='btn sm' data-asset='"+a.id+"'>ดู</button> <button class='btn sm' data-edit-asset='"+a.id+"'>แก้ไข</button> <button class='btn danger sm' data-del-asset='"+a.id+"'>ลบ</button>"}
+      ];
+    });
+    $("#assetTable").innerHTML=tbl(
+      ["รหัส","ชื่อ / หมวด","วันที่ซื้อ",{c:"right",h:"ราคาซื้อ"},{c:"right",h:"มูลค่าคงเหลือ"},"ที่ตั้ง","สถานะ",{c:"right",h:""}],
+      rows, {empty:(all.length)?"ไม่พบทรัพย์สินตามเงื่อนไข":"ยังไม่มีทรัพย์สิน — กด “+ เพิ่มทรัพย์สิน” เพื่อเริ่ม"}
+    );
+  }
+  $("#assetTable").addEventListener("click", function(e){
+    var t;
+    if((t=e.target.closest("[data-edit-asset]"))){ assetModal(assetById(t.dataset.editAsset)); return; }
+    if((t=e.target.closest("[data-del-asset]"))){ var a=assetById(t.dataset.delAsset);
+      confirmModal("ลบทรัพย์สิน “"+a.name+"” ?", function(){ userTouched(); delRec("assets", a.id); renderAssets(); toast("ลบทรัพย์สินแล้ว"); }, {title:"ลบทรัพย์สิน", ok:"ลบ", danger:true}); return; }
+    if((t=e.target.closest("[data-asset]"))){ var a2=assetById(t.dataset.asset); if(a2) assetDetailModal(a2); }
+  });
+
+  function assetModal(a){
+    var edit=!!(a && a.id); a=a||{};
+    var srcDefault = a.source ? a.source : ((a.poId||a.poNo) ? "po" : "po");
+    var catOpts=Object.keys(ASSET_CATS).map(function(k){ return "<option value='"+k+"'"+((a.cat||"machine")===k?" selected":"")+">"+esc(ASSET_CATS[k].name)+"</option>"; }).join("");
+    var stOpts=Object.keys(ASSET_STATUS).map(function(k){ return "<option value='"+k+"'"+((a.status||"active")===k?" selected":"")+">"+esc(ASSET_STATUS[k].label)+"</option>"; }).join("");
+    var supOpts="<option value=''>— ไม่ระบุ —</option>"+store.suppliers.map(function(s){ return "<option value='"+s.id+"'"+(a.supplierId===s.id?" selected":"")+">"+esc(s.name)+"</option>"; }).join("");
+    var poOpts="<option value=''>— เลือกใบสั่งซื้อ —</option>"+(store.pos||[]).slice().sort(function(x,y){return y.no<x.no?-1:1;}).map(function(pp){ var sp=supById(pp.supplierId); return "<option value='"+pp.id+"'"+(a.poId===pp.id?" selected":"")+">"+esc(pp.no)+" · "+esc(sp?sp.name:"")+"</option>"; }).join("");
+    var srcOpts="<option value='po'"+(srcDefault==="po"?" selected":"")+">รับเข้าตามใบสั่งซื้อ (PO)</option>"
+               +"<option value='opening'"+(srcDefault==="opening"?" selected":"")+">ทรัพย์สินเดิม (ยกยอด / มีอยู่ก่อน)</option>";
+    openModal(edit?"แก้ไขทรัพย์สิน":"เพิ่มทรัพย์สิน",
+      '<div class="form-grid">'
+      +field("รหัสทรัพย์สิน","<input type=text id=as_code value=\""+esc(a.code||"")+"\" placeholder='เช่น FA-68-001'>")
+      +field("หมวดหมู่","<select id=as_cat>"+catOpts+"</select>")
+      +'</div>'
+      +field("ชื่อทรัพย์สิน *","<input type=text id=as_name value=\""+esc(a.name||"")+"\">")
+      +field("แหล่งที่มา","<select id=as_src>"+srcOpts+"</select>")
+      +"<div class='field' id='as_poBox'><label>อ้างอิงใบสั่งซื้อ (PO) <span class='hint'>— เลือกแล้วดึงซัพพลายเออร์/วันที่ให้อัตโนมัติ</span></label><select id=as_po>"+poOpts+"</select></div>"
+      +'<div class="form-grid">'
+      +field("วันที่ซื้อ / รับเข้า","<input type=date id=as_date value=\""+(a.purchaseDate?gregISOfromBE(a.purchaseDate):"")+"\">")
+      +field("ราคาซื้อ (บาท)","<input type=number id=as_cost min=0 step=0.01 value=\""+(a.cost||0)+"\">")
+      +'</div>'
+      +field("ซัพพลายเออร์","<select id=as_sup>"+supOpts+"</select>")
+      +'<div class="form-grid">'
+      +field("ที่ตั้ง / แผนก","<input type=text id=as_loc value=\""+esc(a.location||"")+"\">")
+      +field("สถานะ","<select id=as_status>"+stOpts+"</select>")
+      +'</div>'
+      +'<div class="form-grid">'
+      +field("อายุใช้งาน (ปี) <span class='hint'>— สำหรับค่าเสื่อมเส้นตรง</span>","<input type=number id=as_life min=0 value=\""+(a.life||0)+"\">")
+      +field("มูลค่าซาก (บาท)","<input type=number id=as_salvage min=0 step=0.01 value=\""+(a.salvage||0)+"\">")
+      +'</div>'
+      +field("หมายเหตุ","<textarea id=as_note>"+esc(a.note||"")+"</textarea>"),
+      [{label:"ยกเลิก"},{label:edit?"บันทึก":"เพิ่ม", cls:"primary", fn:function(){
+        var name=$("#as_name").value.trim(); if(!name){ shake("#as_name"); return false; }
+        var be=$("#as_date").value ? beFromGregISO($("#as_date").value) : "";
+        var src=$("#as_src").value, poId="", poNo="";
+        if(src==="po"){ poId=$("#as_po").value; var poObj=poById(poId); poNo=poObj?poObj.no:""; }
+        var obj={ id: edit?a.id:uid("a"), code:$("#as_code").value.trim()||"-", name:name, cat:$("#as_cat").value,
+          purchaseDate:be, cost:Math.max(0,parseFloat($("#as_cost").value)||0), supplierId:$("#as_sup").value,
+          source:src, poId:poId, poNo:poNo, location:$("#as_loc").value.trim(), status:$("#as_status").value,
+          life:parseInt($("#as_life").value,10)||0, salvage:Math.max(0,parseFloat($("#as_salvage").value)||0),
+          note:$("#as_note").value.trim(), log:(a.log||[]).slice() };
+        if(!edit) obj.log=[{ date:be||todayBE(), text: src==="po" ? ("รับเข้าตามใบสั่งซื้อ "+(poNo||"(ไม่ได้เลือก PO)")) : "ยกยอดทรัพย์สินเดิม (มีอยู่ก่อนหน้า)" }];
+        userTouched(); putRec("assets", obj); renderAssets(); renderDash(); if(!$("#view-po").hidden) renderPO(); toast(edit?"บันทึกแล้ว":"เพิ่มทรัพย์สินแล้ว");
+      }}]
+    );
+    function toggleSrc(){ var isPo=$("#as_src").value==="po"; $("#as_poBox").hidden=!isPo; }
+    $("#as_src").addEventListener("change", toggleSrc);
+    $("#as_po").addEventListener("change", function(){
+      var po=poById(this.value); if(!po) return;
+      if($("#as_sup")) $("#as_sup").value = po.supplierId||"";
+      if($("#as_date") && !$("#as_date").value) $("#as_date").value = gregISOfromBE(po.date);
+    });
+    toggleSrc();
+  }
+
+  function assetDetailModal(a){
+    var sup=supById(a.supplierId);
+    var st=ASSET_STATUS[a.status||"active"]||ASSET_STATUS.active;
+    var logHtml=(a.log||[]).slice().sort(function(x,y){ return (x.date||"")<(y.date||"")?1:-1; }).map(function(ev){
+      return "<div style='display:flex; gap:10px; padding:7px 0; border-bottom:1px solid var(--line)'><span class='muted mono' style='min-width:96px; font-size:12px'>"+(ev.date?fmtDate(ev.date):"-")+"</span><span>"+esc(ev.text)+"</span></div>";
+    }).join("") || "<div class='muted' style='padding:8px 0'>ยังไม่มีประวัติ</div>";
+    var body=
+      "<div style='display:flex; align-items:center; gap:12px'><span class='pill "+st.cls+"'><span class='dot'></span>"+st.label+"</span>"
+        +"<span class='doc-no' style='font-size:17px'>"+esc(a.code||"")+"</span></div>"
+      +"<h3 style='margin:8px 0 6px; font-family:var(--fd); font-size:18px'>"+esc(a.name)+"</h3>"
+      +"<dl class='kv'>"
+        +"<dt>หมวดหมู่</dt><dd>"+esc(assetCatName(a.cat))+"</dd>"
+        +"<dt>วันที่ซื้อ/รับเข้า</dt><dd>"+(a.purchaseDate?fmtDate(a.purchaseDate):"-")+"</dd>"
+        +"<dt>ซัพพลายเออร์</dt><dd>"+esc(sup?sup.name:"-")+"</dd>"
+        +(a.poNo?"<dt>อ้างอิง PO</dt><dd><span class='doc-no' style='color:var(--po)'>"+esc(a.poNo)+"</span></dd>":"")
+        +"<dt>ที่ตั้ง/แผนก</dt><dd>"+esc(a.location||"-")+"</dd>"
+        +(a.note?"<dt>หมายเหตุ</dt><dd>"+esc(a.note)+"</dd>":"")
+      +"</dl>"
+      +"<div class='panel' style='box-shadow:none; margin:8px 0'><div class='panel-body' style='padding:12px 14px'>"
+        +"<div style='display:flex; justify-content:space-between; font-size:13px; padding:3px 0'><span class='muted'>ราคาซื้อ</span><span class='baht'>"+money(a.cost)+"</span></div>"
+        +"<div style='display:flex; justify-content:space-between; font-size:13px; padding:3px 0'><span class='muted'>ค่าเสื่อมสะสม"+(a.life>0?(" (เส้นตรง "+a.life+" ปี)"):"")+"</span><span class='baht'>"+money(accumDep(a))+"</span></div>"
+        +"<div style='display:flex; justify-content:space-between; font-size:14px; padding:6px 0 0; border-top:1px solid var(--line); margin-top:4px; font-weight:700'><span>มูลค่าคงเหลือ</span><span class='baht' style='color:var(--accent)'>"+money(bookValue(a))+"</span></div>"
+      +"</div></div>"
+      +"<div style='font-weight:600; font-size:13.5px; margin:10px 0 2px'>ประวัติ / บันทึกกิจกรรม</div>"
+      +"<div id='as_log'>"+logHtml+"</div>"
+      +"<div style='display:flex; gap:8px; margin-top:10px'>"
+        +"<input type=date id='as_logdate' style='width:auto'>"
+        +"<input type=text id='as_logtext' placeholder='เช่น ส่งซ่อม / ย้ายที่ / จำหน่าย' style='flex:1'>"
+        +"<button class='btn sm primary' id='as_logadd'>เพิ่ม</button>"
+      +"</div>";
+    openModal("รายละเอียดทรัพย์สิน", body, [
+      {label:"แก้ไข", fn:function(){ assetModal(assetById(a.id)||a); return false; }},
+      {label:"ปิด", cls:"primary"}
+    ]);
+    $("#as_logdate").value=todayISO();
+    $("#as_logadd").addEventListener("click", function(){
+      var txt=$("#as_logtext").value.trim(); if(!txt){ shake("#as_logtext"); return; }
+      var be=$("#as_logdate").value ? beFromGregISO($("#as_logdate").value) : todayBE();
+      var cur=assetById(a.id)||a;
+      var obj=Object.assign({}, cur, { log:(cur.log||[]).slice().concat([{ date:be, text:txt }]) });
+      userTouched(); putRec("assets", obj); renderAssets();
+      assetDetailModal(assetById(a.id)||obj);
+      toast("เพิ่มบันทึกประวัติแล้ว");
+    });
+  }
+
+  /* ---------------- modal engine ---------------- */
+  var modalActions=[];
+  function openModal(title, bodyHtml, actions){
+    $("#modalTitle").textContent=title;
+    $("#modalBody").innerHTML=bodyHtml;
+    modalActions=actions||[{label:"ปิด",cls:"primary"}];
+    $("#modalFoot").innerHTML=modalActions.map(function(a,i){
+      var cls = a.cls==="primary"?"btn primary": a.cls==="danger-btn"?"btn danger":"btn";
+      return "<button class='"+cls+"' data-act='"+i+"'>"+esc(a.label)+"</button>";
+    }).join("");
+    $("#modalBack").hidden=false;
+    var firstInput=$("#modalBody input, #modalBody select, #modalBody textarea");
+    if(firstInput) setTimeout(function(){firstInput.focus();},40);
+  }
+  function closeModal(){ $("#modalBack").hidden=true; }
+  $("#modalFoot").addEventListener("click", function(e){
+    var b=e.target.closest("[data-act]"); if(!b) return;
+    var a=modalActions[+b.dataset.act];
+    var res = a.fn ? a.fn() : undefined;
+    if(res!==false) closeModal();
+  });
+  $("#modalX").addEventListener("click", closeModal);
+  $("#modalBack").addEventListener("click", function(e){ if(e.target===$("#modalBack")) closeModal(); });
+  document.addEventListener("keydown", function(e){ if(e.key==="Escape" && !$("#modalBack").hidden) closeModal(); });
+
+  function field(label, control){
+    return "<div class='field'><label>"+label+"</label>"+control+"</div>";
+  }
+  function shake(sel){ var e=$(sel); if(e){ e.focus(); e.style.borderColor="var(--danger)"; setTimeout(function(){e.style.borderColor="";},1200); } }
+
+  // in-app confirm (native confirm() is blocked inside the sandboxed artifact iframe)
+  function confirmModal(msg, onYes, opts){
+    opts=opts||{};
+    openModal(opts.title||"ยืนยัน",
+      "<p style='margin:0; font-size:14.5px; line-height:1.65; white-space:pre-line'>"+esc(msg)+"</p>",
+      [{label:opts.cancel||"ยกเลิก"},
+       {label:opts.ok||"ยืนยัน", cls:opts.danger?"danger-btn":"primary", fn:function(){ onYes(); }}]
+    );
+  }
+
+  /* ---------------- table action delegation ---------------- */
+  document.addEventListener("click", function(e){
+    var t;
+    if((t=e.target.closest("[data-edit-item]"))) itemModal(itemById(t.dataset.editItem));
+    else if((t=e.target.closest("[data-del-item]"))){
+      var it=itemById(t.dataset.delItem);
+      confirmModal("ลบวัสดุ “"+it.name+"” ?\nเอกสารเดิมที่อ้างถึงจะแสดงว่าถูกลบ", function(){
+        userTouched(); delRec("items", it.id); renderItems(); renderDash(); if(!$("#view-reorder").hidden) renderReorder(); toast("ลบวัสดุแล้ว");
+      }, {title:"ลบวัสดุ", ok:"ลบ", danger:true});
+    }
+    else if((t=e.target.closest("[data-edit-sup]"))) supModal(supById(t.dataset.editSup));
+    else if((t=e.target.closest("[data-del-sup]"))){
+      var s=supById(t.dataset.delSup);
+      confirmModal("ลบซัพพลายเออร์ “"+s.name+"” ?", function(){
+        userTouched(); delRec("suppliers", s.id); renderSup(); toast("ลบแล้ว");
+      }, {title:"ลบซัพพลายเออร์", ok:"ลบ", danger:true});
+    }
+    else if((t=e.target.closest("[data-openasset]"))){ e.preventDefault(); var as=assetById(t.dataset.openasset); if(as) assetDetailModal(as); }
+  });
+  $("#addItemBtn").addEventListener("click", function(){ itemModal(null); });
+  $("#addSupBtn").addEventListener("click", function(){ supModal(null); });
+
+  /* ---------------- data management ---------------- */
+  function updateDemoBadge(){ var b=$("#demoBadge"); if(b) b.hidden = !store.demo; }
+  function userTouched(){ if(store.demo){ setDemoFlag(false); } }
+
+  function companyModal(){
+    var c = store.company || DEFAULT_COMPANY;
+    var pendingLogo = c.logoImg || "";
+    openModal("ข้อมูลบริษัท (หัวใบสั่งซื้อ)",
+      field("ชื่อบริษัท (ไทย) *","<input type=text id=co_th value=\""+esc(c.nameTh||"")+"\">")
+      +field("ชื่อบริษัท (อังกฤษ)","<input type=text id=co_en value=\""+esc(c.nameEn||"")+"\">")
+      +field("ที่อยู่","<textarea id=co_addr>"+esc(c.address||"")+"</textarea>")
+      +'<div class="form-grid">'
+        +field("โทรศัพท์","<input type=text id=co_phone value=\""+esc(c.phone||"")+"\">")
+        +field("แฟกซ์","<input type=text id=co_fax value=\""+esc(c.fax||"")+"\">")
+      +'</div>'
+      +'<div class="form-grid">'
+        +field("อีเมล","<input type=text id=co_email value=\""+esc(c.email||"")+"\">")
+        +field("เลขประจำตัวผู้เสียภาษี","<input type=text id=co_tax value=\""+esc(c.taxId||"")+"\">")
+      +'</div>'
+      +"<div class='field'><label>โลโก้บริษัท (รูปภาพ) <span class='hint'>— แสดงมุมขวาบนของใบ</span></label>"
+        +"<div style='display:flex; align-items:center; gap:12px'>"
+          +"<div id='co_logoprev' style='min-width:90px; height:56px; border:1px dashed var(--line-strong); border-radius:8px; display:grid; place-items:center; padding:4px; background:var(--surface-2)'></div>"
+          +"<div style='display:flex; flex-direction:column; gap:6px'>"
+            +"<label class='btn sm' style='cursor:pointer; margin:0'>เลือกไฟล์รูป<input type='file' id='co_logofile' accept='image/*' hidden></label>"
+            +"<button type='button' class='btn sm danger' id='co_logoclear'>ลบรูปโลโก้</button>"
+          +"</div>"
+        +"</div></div>"
+      +field("หรือใช้ตัวอักษรโลโก้ (ถ้าไม่มีรูป)","<input type=text id=co_logo value=\""+esc(c.logo||"")+"\" placeholder='เช่น ALOIS O.P.S.'>"),
+      [{label:"ยกเลิก"},{label:"บันทึก", cls:"primary", fn:function(){
+        var th=$("#co_th").value.trim(); if(!th){ shake("#co_th"); return false; }
+        setCompany({ nameTh:th, nameEn:$("#co_en").value.trim(), address:$("#co_addr").value.trim(),
+          phone:$("#co_phone").value.trim(), fax:$("#co_fax").value.trim(), email:$("#co_email").value.trim(),
+          taxId:$("#co_tax").value.trim(), logo:$("#co_logo").value.trim(), logoImg:pendingLogo, contactPerson:(c.contactPerson||"") });
+        toast("บันทึกข้อมูลบริษัทแล้ว");
+      }}]
+    );
+    function refreshLogoPrev(){
+      var p=$("#co_logoprev"); if(!p) return;
+      p.innerHTML = pendingLogo ? "<img src='"+pendingLogo+"' style='max-height:48px; max-width:150px; object-fit:contain'>"
+                                : "<span class='muted' style='font-size:11px'>ยังไม่มีรูป</span>";
+    }
+    refreshLogoPrev();
+    $("#co_logofile").addEventListener("change", function(e){
+      var f=e.target.files && e.target.files[0]; if(!f) return;
+      if(f.size > 600000) toast("รูปค่อนข้างใหญ่ แนะนำย่อให้ < 500KB เพื่อความเร็ว");
+      var rd=new FileReader(); rd.onload=function(){ pendingLogo=rd.result; refreshLogoPrev(); }; rd.readAsDataURL(f);
+    });
+    $("#co_logoclear").addEventListener("click", function(){ pendingLogo=""; refreshLogoPrev(); });
+  }
+
+  $("#dataBtn").addEventListener("click", function(){
+    openModal("จัดการข้อมูล",
+      "<p style='margin:0; color:var(--ink-soft); font-size:14px; line-height:1.65'>ข้อมูลทั้งหมดเก็บไว้ในเบราว์เซอร์ของเครื่องนี้ คุณเพิ่ม แก้ไข และลบ วัสดุ ซัพพลายเออร์ ใบสั่งซื้อ และเอกสารได้เองทั้งหมดจากแต่ละแท็บ</p>"
+      +"<div style='display:flex; flex-direction:column; gap:12px'>"
+        +"<div style='border:1px solid var(--line); border-radius:10px; padding:15px'>"
+          +"<strong style='font-size:14.5px'>ใบสั่งซื้อ (ข้อมูลบริษัท / ออกแบบเอง)</strong>"
+          +"<p class='muted' style='margin:5px 0 12px; font-size:13px; line-height:1.5'>ตั้งชื่อ/ที่อยู่/เลขภาษี + อัปโหลดโลโก้ และออกแบบหน้าตาใบสั่งซื้อเองได้ทั้งหมด</p>"
+          +"<div style='display:flex; gap:8px; flex-wrap:wrap'>"
+            +"<button class='btn' id='dm_company'>ข้อมูลบริษัท / โลโก้</button>"
+            +"<button class='btn' id='dm_design'>🎨 ออกแบบใบสั่งซื้อ</button>"
+          +"</div>"
+        +"</div>"
+        +"<div style='border:1px solid var(--line); border-radius:10px; padding:15px'>"
+          +"<strong style='font-size:14.5px'>เริ่มใช้งานจริง</strong>"
+          +"<p class='muted' style='margin:5px 0 12px; font-size:13px; line-height:1.5'>ล้างข้อมูลตัวอย่างทั้งหมดออก แล้วกรอกวัสดุของคุณเองตั้งแต่ต้น</p>"
+          +"<button class='btn' id='dm_clear' style='border-color:var(--danger); color:var(--danger)'>ล้างข้อมูลทั้งหมด แล้วเริ่มใหม่</button>"
+        +"</div>"
+        +"<div style='border:1px solid var(--line); border-radius:10px; padding:15px'>"
+          +"<strong style='font-size:14.5px'>ข้อมูลตัวอย่าง</strong>"
+          +"<p class='muted' style='margin:5px 0 12px; font-size:13px; line-height:1.5'>โหลดชุดข้อมูลตัวอย่างกลับมาเพื่อทดลองใช้ (จะเขียนทับข้อมูลปัจจุบัน)</p>"
+          +"<button class='btn' id='dm_sample'>โหลดข้อมูลตัวอย่าง</button>"
+        +"</div>"
+      +"</div>",
+      [{label:"ปิด", cls:"primary"}]
+    );
+    $("#dm_company").addEventListener("click", function(){ companyModal(); });
+    $("#dm_design").addEventListener("click", function(){ closeModal(); openPoDesigner(); });
+    $("#dm_clear").addEventListener("click", function(){
+      confirmModal((dbMode?"ล้างข้อมูลทั้งหมดสำหรับทุกเครื่องที่ใช้ลิงก์นี้ (วัสดุ ซัพพลายเออร์ ใบสั่งซื้อ เอกสาร)":"ล้างข้อมูลทั้งหมด (วัสดุ ซัพพลายเออร์ ใบสั่งซื้อ เอกสาร)")+" แล้วเริ่มใหม่?\nการกระทำนี้ย้อนกลับไม่ได้", function(){
+        _seq={}; clearAllData(); closeModal(); showView("items");
+        toast("ล้างข้อมูลแล้ว — เริ่มเพิ่มวัสดุของคุณได้เลย");
+      }, {title:"ล้างข้อมูลทั้งหมด", ok:"ล้างข้อมูล", danger:true});
+    });
+    $("#dm_sample").addEventListener("click", function(){
+      confirmModal("โหลดข้อมูลตัวอย่างกลับมา? ข้อมูลปัจจุบันจะถูกเขียนทับ"+(dbMode?" (มีผลกับทุกเครื่อง)":""), function(){
+        closeModal(); showView("dash");
+        resetToSample().then(function(){ updateDemoBadge(); renderActive(); });
+        toast("กำลังโหลดข้อมูลตัวอย่าง…");
+      }, {title:"โหลดข้อมูลตัวอย่าง", ok:"โหลด"});
+    });
+  });
+
+  /* ---------------- init ---------------- */
+  renderDash();     // render the shell immediately while the database connects
+  initData();
+
+})();
+</script>
